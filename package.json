@@ -1,0 +1,25 @@
+{
+  "name": "crux.md",
+  "private": true,
+  "license": "UNLICENSED",
+  "workspaces": [
+    "apps/api",
+    "packages/*"
+  ],
+  "packageManager": "yarn@1.22.19",
+  "scripts": {
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "release-it": "^15.10.1"
+  },
+  "release-it": {
+    "git": {
+      "changelog": "npx auto-changelog --stdout --commit-limit false -u --template https://raw.githubusercontent.com/release-it/release-it/main/templates/changelog-compact.hbs"
+    },
+    "hooks": {
+      "after:bump": "npx auto-changelog -p"
+    }
+  },
+  "version": "1.12.0"
+}
