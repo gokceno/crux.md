@@ -1,3 +1,6 @@
+import YAML from 'yaml';
+import fs from 'fs/promises'
+import path from 'path';
 import { 
   GraphQLSchema, 
   GraphQLObjectType, 
@@ -8,32 +11,6 @@ import {
   GraphQLBoolean,
   GraphQLInputObjectType 
 } from 'graphql';
-
-
-const d = {
-  "collections": [
-    {
-      "products": [
-        { "id": "int" },
-        { "parent": "string" },
-        {
-          "campaigns": [
-            { 
-              "is_active": "bool",
-              "name": "string",
-            }
-          ]
-        } 
-      ]
-    },
-    {
-      "news": [
-        { "id": "int" },
-        { "tags": [] }, 
-      ]
-    }
-  ],
-};
 
 const Bucket = () => {
   let _source = {};
@@ -49,8 +26,12 @@ const Bucket = () => {
     return this;
   }
   const get = () => {}
-  const fetch = () => {
-    return _source.list();
+  const fetch = async () => {
+    if(_source.isFiltered) return _source.list();
+    return (await _source.list({ collection: 'movies' })).filter(item => {
+      const frontmatter = _source.getFrontMatter(item.id);
+      return true;
+    });
   }
   return {
     select,
@@ -62,20 +43,38 @@ const Bucket = () => {
 }
 
 const Source = () => {
-  const FileSystem = () => {
-    const list = () => {
-      return [{}, {}];
+  const FileSystem = ({ bucketPath }) => {
+    const _defaultFileExtension = 'md';
+    const _root = bucketPath || './';
+    const list = async ({ collection }) => {
+      try {
+        return (await fs.readdir(path.join(_root, 'collections', collection)))
+          .filter(file => file.split('.')[1] === _defaultFileExtension);
+      }
+      catch(e) {
+        return [];
+      }
     }
-    return { list }
+    const getFrontMatter = () => {
+      return '...';
+    }
+    const getTextContent = () => {
+      return '...';
+    }
+    return {
+      isFiltered: false,
+      list,
+      getFrontMatter,
+      getTextContent,
+    }
   }
   return { FileSystem }
 }
 
-
 const Resolvers = () => {
   const collection = (collection, { filters }) => {
     const bucket = Bucket().load({
-      source: Source().FileSystem({ path: '../files' })
+      source: Source().FileSystem({ bucketPath: '../../samples/bucket' })
     });
     return bucket
       .select({ collection })
@@ -195,12 +194,16 @@ const transform = (node) => {
   return nodeObj;
 }
 
+const config = YAML.parse(
+  await fs.readFile('../../samples/schema.yml', 'utf8')
+);
+
 const schema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'Collections',
     fields: () => {
       const fields = {};
-      d.collections.map(item => transform(item)).forEach(field => {
+      config.collections.map(item => transform(item)).forEach(field => {
         fields[Object.keys(field)[0]] = field[Object.keys(field)[0]];
       });
       return fields;

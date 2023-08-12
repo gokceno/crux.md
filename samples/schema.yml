@@ -1,0 +1,11 @@
+collections:
+ - products:
+    - id: "int"
+    - parent: "string"
+    - tags: []
+    - campaigns:
+      - name: "string"
+        is_active: "bool"
+ - news:
+    - id: "int"
+    - title: "string"
