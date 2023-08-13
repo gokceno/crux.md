@@ -34,9 +34,8 @@ const Bucket = () => {
   }
   const get = async () => {}
   const fetch = async () => {
-    if(_source.isFiltered) return _source.list();
+    if(_source.isFiltered || _filters === undefined) return (await _source.list({ collection: _collection }));
     const filteredList = (await _source.list({ collection: _collection })).filter(item => {
-      if (_filters == undefined) return true; // FIXME: Can move outside to skip the loop
       return _filters.every(([field, criteria]) => {
         const [ condition ] = Object.keys(criteria);
         const [ value ] = Object.values(criteria);
@@ -48,16 +47,22 @@ const Bucket = () => {
             return item[field] != value;
             break;
           case 'null': 
-            return item[field] == null || item[field] == undefined;
+            return item[field] === null || item[field] === undefined || item[field].length === 0;
             break;
           case 'nnull': 
-            return item[field] != null && item[field] != undefined;
+            return item[field] !== null && item[field] !== undefined && item[field].length !== 0;
             break;
           case 'gte': 
             return +item[field] >= +value;
             break;
           case 'lte': 
             return +item[field] <= +value;
+            break;
+          case 'gt': 
+            return +item[field] > +value;
+            break;
+          case 'lt': 
+            return +item[field] < +value;
             break;
           default:
             return false;
@@ -155,6 +160,8 @@ const mappings = {
     neq: { type: GraphQLInt },
     lte: { type: GraphQLInt },
     gte: { type: GraphQLInt },
+    lt: { type: GraphQLInt },
+    gt: { type: GraphQLInt },
   },
   bool: {
     eq: { type: GraphQLBoolean },
