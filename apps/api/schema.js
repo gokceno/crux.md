@@ -14,7 +14,10 @@ import {
 
 const Bucket = () => {
   let _source = {};
-  function select() {
+  let _collection;
+  function select({ collection }) {
+    if(collection == undefined) throw new Error('Collection is not defined');
+    _collection = collection;
     return this;
   }
   function filter() {
@@ -25,13 +28,11 @@ const Bucket = () => {
     _source = source;
     return this;
   }
-  const get = () => {}
+  const get = async () => {}
   const fetch = async () => {
     if(_source.isFiltered) return _source.list();
-    return (await _source.list({ collection: 'movies' })).filter(item => {
-      const frontmatter = _source.getFrontMatter(item.id);
-      return true;
-    });
+    return (await _source.list({ collection: _collection }))
+      .filter(item => item.title == 'A Quıte Place: Day One');
   }
   return {
     select,
@@ -48,31 +49,54 @@ const Source = () => {
     const _root = bucketPath || './';
     const list = async ({ collection }) => {
       try {
-        return (await fs.readdir(path.join(_root, 'collections', collection)))
-          .filter(file => file.split('.')[1] === _defaultFileExtension);
-      }
-      catch(e) {
+        const filenames = await fs.readdir(path.join(_root, 'collections', collection));
+        const filteredFiles = filenames.filter(filename => filename.split('.')[1] === _defaultFileExtension);
+        const filePromises = filteredFiles.map(async (filename) => {
+          try {
+            const frontmatter = await getFrontMatter({ collection, filename });
+            return {
+              ...YAML.parse(frontmatter)
+            };
+          } catch (e) {
+            console.error(e);
+            return {};
+          }
+        });
+        return await Promise.all(filePromises);
+      } catch (e) {
+          console.error(e);
         return [];
       }
     }
-    const getFrontMatter = () => {
-      return '...';
+    const getFrontMatter = async ({ collection, filename }) => {
+      const pattern = '^(' +
+        '\\ufeff?' +
+        '(= yaml =|---)' +
+        '$([\\s\\S]*?)' +
+        '^(?:\\2|\\.\\.\\.)\\s*' +
+        '$' +
+        '(?:\\n)?)'
+      const regex = new RegExp(pattern, 'm');
+      const file = await fs.readFile(path.join(_root, 'collections', collection, filename), 'utf-8');
+      const match = regex.exec(file);
+      if(match == undefined) throw new Error('Can not extract frontmatter.');
+      return match[0].replaceAll('---', '');
     }
-    const getTextContent = () => {
+    const getBody = async ({ filename }) => {
       return '...';
     }
     return {
       isFiltered: false,
       list,
       getFrontMatter,
-      getTextContent,
+      getBody,
     }
   }
   return { FileSystem }
 }
 
 const Resolvers = () => {
-  const collection = (collection, { filters }) => {
+  const collection = async (collection, { filters }) => {
     const bucket = Bucket().load({
       source: Source().FileSystem({ bucketPath: '../../samples/bucket' })
     });
@@ -189,7 +213,7 @@ const transform = (node) => {
         fields: mapFields(node),
       })
     ),
-    resolve: (_, params) => Resolvers().collection(name, params),
+    resolve: async (_, params) => await Resolvers().collection(name, params)
   }
   return nodeObj;
 }

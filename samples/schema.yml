@@ -1,6 +1,7 @@
 collections:
  - products:
     - id: "int"
+    - filename: "string"
     - parent: "string"
     - tags: []
     - campaigns:
@@ -8,4 +9,15 @@ collections:
         is_active: "bool"
  - news:
     - id: "int"
+    - filename: "string"
     - title: "string"
+ - movies:
+    - layout: "string"
+    - title: "string"
+    - on_homepage: "bool"
+    - in_theatres: "bool"
+    - in_theatres_date: "string"
+    - tag_line: "string"
+    - poster_url: "string"
+    - video_url: "string"
+    - is_active: "bool"
