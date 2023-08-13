@@ -15,12 +15,16 @@ import {
 const Bucket = () => {
   let _source = {};
   let _collection;
+  let _filters = [];
   function select({ collection }) {
     if(collection == undefined) throw new Error('Collection is not defined');
     _collection = collection;
     return this;
   }
-  function filter() {
+  function filter({ filters }) {
+    if(filters !== undefined) {
+      _filters = Object.entries(filters);
+    }
     return this;
   }
   function load({ source }) {
@@ -31,8 +35,36 @@ const Bucket = () => {
   const get = async () => {}
   const fetch = async () => {
     if(_source.isFiltered) return _source.list();
-    return (await _source.list({ collection: _collection }))
-      .filter(item => item.title == 'A Quıte Place: Day One');
+    const filteredList = (await _source.list({ collection: _collection })).filter(item => {
+      if (_filters == undefined) return true; // FIXME: Can move outside to skip the loop
+      return _filters.every(([field, criteria]) => {
+        const [ condition ] = Object.keys(criteria);
+        const [ value ] = Object.values(criteria);
+        switch(condition) {
+          case 'eq': 
+            return item[field] == value;
+            break;
+          case 'neq': 
+            return item[field] != value;
+            break;
+          case 'null': 
+            return item[field] == null || item[field] == undefined;
+            break;
+          case 'nnull': 
+            return item[field] != null && item[field] != undefined;
+            break;
+          case 'gte': 
+            return +item[field] >= +value;
+            break;
+          case 'lte': 
+            return +item[field] <= +value;
+            break;
+          default:
+            return false;
+        }
+      });
+    });
+    return filteredList;
   }
   return {
     select,
@@ -69,6 +101,7 @@ const Source = () => {
       }
     }
     const getFrontMatter = async ({ collection, filename }) => {
+      // via and thanks to: https://github.com/jxson/front-matter/blob/master/index.js
       const pattern = '^(' +
         '\\ufeff?' +
         '(= yaml =|---)' +
@@ -99,9 +132,10 @@ const Resolvers = () => {
   const collection = async (collection, { filters }) => {
     const bucket = Bucket().load({
       source: Source().FileSystem({ bucketPath: '../../samples/bucket' })
-    });
+    });;
     return bucket
       .select({ collection })
+      .filter({ filters })
       .fetch({ limit: 5, offset: 1 });
   }
   return { 
@@ -121,6 +155,9 @@ const mappings = {
     neq: { type: GraphQLInt },
     lte: { type: GraphQLInt },
     gte: { type: GraphQLInt },
+  },
+  bool: {
+    eq: { type: GraphQLBoolean },
   }
 };
 const mapGraphQLTypes = (type, leaf) => {
@@ -178,7 +215,7 @@ const mapFilterArgs = (collectionName, node) => {
   let leafObj = {};
   Object.values(node)[0].map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
-      if(['string', 'int'].includes(type)) {
+      if(['string', 'int', 'bool'].includes(type)) {
         leafObj[name] = { 
           type: new GraphQLInputObjectType({
             name: `filter_${collectionName}_${name}`, 
