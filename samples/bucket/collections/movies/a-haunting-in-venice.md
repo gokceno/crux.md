@@ -1,7 +1,7 @@
 ---
 layout: movies
 title: Venedik'te Cinayet
-on_homepage: false
+on_homepage: true
 in_theatres: false
 in_theatres_date: '2023-09-15'
 tag_line: Ölüm herkes için geliyor..

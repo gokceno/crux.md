@@ -21,3 +21,10 @@ collections:
     - poster_url: "string"
     - video_url: "string"
     - is_active: "bool"
+    - social_media:
+      - type: "string"
+      - url: "string"
+singles:
+  - about_us:
+    - title: "string"
+    - tags: []

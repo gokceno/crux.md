@@ -15,10 +15,13 @@ import {
 const Bucket = () => {
   let _source = {};
   let _collection;
+  let _single;
   let _filters = [];
-  function select({ collection }) {
-    if(collection == undefined) throw new Error('Collection is not defined');
+  function select({ collection, single }) {
+    // TODO: Check if directories are readable
+    if(collection == undefined && single == undefined) throw new Error('Collection and single are not defined, one of them must be selected.');
     _collection = collection;
+    _single = single;
     return this;
   }
   function filter({ filters }) {
@@ -28,17 +31,23 @@ const Bucket = () => {
     return this;
   }
   function load({ source }) {
+    // TODO: Check if directories are readable
     if(source == undefined) throw new Error('Source is not defined');
     _source = source;
     return this;
   }
-  const get = async () => {}
   const fetch = async () => {
+    if(_collection !== undefined) return _fetchCollection();
+    if(_single !== undefined) return _fetchSingle();
+    throw new Error('Select failed.');
+  }
+  const _fetchCollection = async() => {
     if(_source.isFiltered || _filters === undefined) return (await _source.list({ collection: _collection }));
     const filteredList = (await _source.list({ collection: _collection })).filter(item => {
       return _filters.every(([field, criteria]) => {
         const [ condition ] = Object.keys(criteria);
         const [ value ] = Object.values(criteria);
+        // TODO: Can be moved to a comparison module
         switch(condition) {
           case 'eq': 
             return item[field] == value;
@@ -71,11 +80,13 @@ const Bucket = () => {
     });
     return filteredList;
   }
+  const _fetchSingle = async() => {
+    return (await _source.get({ filename: _single }));
+  }
   return {
     select,
     filter,
     load,
-    get,
     fetch,
   }
 }
@@ -90,10 +101,10 @@ const Source = () => {
         const filteredFiles = filenames.filter(filename => filename.split('.')[1] === _defaultFileExtension);
         const filePromises = filteredFiles.map(async (filename) => {
           try {
-            const frontmatter = await getFrontMatter({ collection, filename });
+            const frontmatter = await _extractFrontMatter({ collection, filename });
             return {
               ...YAML.parse(frontmatter)
-            };
+            }
           } catch (e) {
             console.error(e);
             return {};
@@ -105,7 +116,28 @@ const Source = () => {
         return [];
       }
     }
-    const getFrontMatter = async ({ collection, filename }) => {
+    const get = async({ filename }) => {
+      try {
+        const frontmatter = await _extractFrontMatter({ filename: filename + '.md' });
+        return {
+          ...YAML.parse(frontmatter)
+        }
+      } catch (e) {
+        console.error(e);
+        return {};
+      }
+    }
+    const _extractFrontMatter = async ({ collection, filename }) => {
+      let file;
+      if(collection !== undefined) {
+        file = await fs.readFile(path.join(_root, 'collections', collection, filename), 'utf-8');
+      }
+      if(collection === undefined) {
+        file = await fs.readFile(path.join(_root, 'singles', filename), 'utf-8');
+      }
+      if(file === undefined) {
+        throw new Error('Failed to get file contents or types got mixed up.');
+      }
       // via and thanks to: https://github.com/jxson/front-matter/blob/master/index.js
       const pattern = '^(' +
         '\\ufeff?' +
@@ -115,36 +147,41 @@ const Source = () => {
         '$' +
         '(?:\\n)?)'
       const regex = new RegExp(pattern, 'm');
-      const file = await fs.readFile(path.join(_root, 'collections', collection, filename), 'utf-8');
-      const match = regex.exec(file);
-      if(match == undefined) throw new Error('Can not extract frontmatter.');
-      return match[0].replaceAll('---', '');
-    }
-    const getBody = async ({ filename }) => {
-      return '...';
+      const [ match ] = regex.exec(file);
+      if(match == undefined) throw new Error('Can not extract frontmatter, file may be formatted incorrectly.');
+      return match.replaceAll('---', '');
     }
     return {
       isFiltered: false,
       list,
-      getFrontMatter,
-      getBody,
+      get,
     }
   }
   return { FileSystem }
 }
 
 const Resolvers = () => {
+  const iterables = ['collection'];
+  const filterables = ['collection'];
+  const bucket = Bucket().load({
+    source: Source().FileSystem({ bucketPath: '../../samples/bucket' })
+  });
   const collection = async (collection, { filters }) => {
-    const bucket = Bucket().load({
-      source: Source().FileSystem({ bucketPath: '../../samples/bucket' })
-    });;
     return bucket
       .select({ collection })
       .filter({ filters })
       .fetch({ limit: 5, offset: 1 });
   }
+  const single = async (single) => {
+    return bucket
+      .select({ single })
+      .fetch();
+  }
   return { 
     collection,
+    single,
+    iterables,
+    filterables,
   }
 }
 
@@ -233,7 +270,6 @@ const mapFilterArgs = (collectionName, node) => {
     });
     return leafObj;
   });
-
   if(Object.keys(leafObj).length === 0) return undefined;
   return { 
     filters: { 
@@ -244,20 +280,31 @@ const mapFilterArgs = (collectionName, node) => {
     )
   }};
 }
-const transform = (node) => {
+const transform = ({ node, resolver, resolveBy }) => {
+  // TODO: check if resolve by is a valid method
   let nodeObj = {};
   const name = Object.keys(node)[0];
   nodeObj[name] = {
-    args: {
+    resolve: async (_, params) => await Resolvers()[resolveBy](name, params)
+  }
+  if(Resolvers().filterables.includes(resolveBy)) {
+    nodeObj[name]['args'] = {
       ...mapFilterArgs(name, node)
-    },
-    type: new GraphQLList(
+    }
+  }
+  if(Resolvers().iterables.includes(resolveBy)) {
+    nodeObj[name]['type'] = new GraphQLList(
       new GraphQLObjectType({
         name,
         fields: mapFields(node),
       })
-    ),
-    resolve: async (_, params) => await Resolvers().collection(name, params)
+    );
+  }
+  else {
+    nodeObj[name]['type'] = new GraphQLObjectType({
+      name,
+      fields: mapFields(node),
+    });
   }
   return nodeObj;
 }
@@ -271,7 +318,10 @@ const schema = new GraphQLSchema({
     name: 'Collections',
     fields: () => {
       const fields = {};
-      config.collections.map(item => transform(item)).forEach(field => {
+      config.collections.map(node => transform({ node, resolver: Resolvers(), resolveBy: 'collection' })).forEach(field => {
+        fields[Object.keys(field)[0]] = field[Object.keys(field)[0]];
+      });
+      config.singles.map(node => transform({ node, resolver: Resolvers(), resolveBy: 'single' })).forEach(field => {
         fields[Object.keys(field)[0]] = field[Object.keys(field)[0]];
       });
       return fields;
