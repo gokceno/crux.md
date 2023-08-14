@@ -5,7 +5,6 @@ import {
   GraphQLSchema, 
   GraphQLObjectType, 
   GraphQLString, 
-  GraphQLNonNull, 
   GraphQLList, 
   GraphQLInt, 
   GraphQLBoolean,
@@ -19,7 +18,8 @@ const Bucket = () => {
   let _filters = [];
   function select({ collection, single }) {
     // TODO: Check if directories are readable
-    if(collection == undefined && single == undefined) throw new Error('Collection and single are not defined, one of them must be selected.');
+    if(collection == undefined && single == undefined) 
+        throw new Error('Collection and single are not defined, one of them must be selected.');
     _collection = collection;
     _single = single;
     return this;
@@ -315,7 +315,7 @@ const config = YAML.parse(
 
 const schema = new GraphQLSchema({
   query: new GraphQLObjectType({
-    name: 'Collections',
+    name: 'Query',
     fields: () => {
       const fields = {};
       config.collections.map(node => transform({ node, resolver: Resolvers(), resolveBy: 'collection' })).forEach(field => {
