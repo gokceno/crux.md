@@ -7,7 +7,6 @@ import {
   GraphQLBoolean,
   GraphQLInputObjectType 
 } from 'graphql';
-import { Resolvers } from '@crux/graphql-api-resolvers';
 
 const mappings = {
   string: {
@@ -109,14 +108,14 @@ export const transform = ({ node, resolver, resolveBy }) => {
   let nodeObj = {};
   const name = Object.keys(node)[0];
   nodeObj[name] = {
-    resolve: async (_, params) => await Resolvers()[resolveBy](name, params)
+    resolve: async (_, params) => await resolver[resolveBy](name, params)
   }
-  if(Resolvers().filterables.includes(resolveBy)) {
+  if(resolver.filterables.includes(resolveBy)) {
     nodeObj[name]['args'] = {
       ...mapFilterArgs(name, node)
     }
   }
-  if(Resolvers().iterables.includes(resolveBy)) {
+  if(resolver.iterables.includes(resolveBy)) {
     nodeObj[name]['type'] = new GraphQLList(
       new GraphQLObjectType({
         name,
