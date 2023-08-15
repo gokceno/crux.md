@@ -17,7 +17,7 @@ const Bucket = () => {
   let _single;
   let _filters = [];
   function select({ collection, single }) {
-    // TODO: Check if directories are readable
+    // TODO: Check if directories are readable 
     if(collection == undefined && single == undefined) 
         throw new Error('Collection and single are not defined, one of them must be selected.');
     _collection = collection;
@@ -47,35 +47,7 @@ const Bucket = () => {
       return _filters.every(([field, criteria]) => {
         const [ condition ] = Object.keys(criteria);
         const [ value ] = Object.values(criteria);
-        // TODO: Can be moved to a comparison module
-        switch(condition) {
-          case 'eq': 
-            return item[field] == value;
-            break;
-          case 'neq': 
-            return item[field] != value;
-            break;
-          case 'null': 
-            return item[field] === null || item[field] === undefined || item[field].length === 0;
-            break;
-          case 'nnull': 
-            return item[field] !== null && item[field] !== undefined && item[field].length !== 0;
-            break;
-          case 'gte': 
-            return +item[field] >= +value;
-            break;
-          case 'lte': 
-            return +item[field] <= +value;
-            break;
-          case 'gt': 
-            return +item[field] > +value;
-            break;
-          case 'lt': 
-            return +item[field] < +value;
-            break;
-          default:
-            return false;
-        }
+        return Comparison()[condition](item[field], value);
       });
     });
     return filteredList;
@@ -88,6 +60,27 @@ const Bucket = () => {
     filter,
     load,
     fetch,
+  }
+}
+
+const Comparison = () => {
+  const _eq = (iValue, cValue) => iValue == cValue;
+  const _neq = (iValue, cValue) => iValue != cValue;
+  const _null = (iValue, cValue) => iValue === null || iValue === undefined || iValue.length === 0;
+  const _nnull = (iValue, cValue) => iValue !== null && iValue !== undefined && iValue.length !== 0;
+  const _gte = (iValue, cValue) => +iValue >= +cValue;
+  const _lte = (iValue, cValue) => +iValue <= +cValue;
+  const _gt = (iValue, cValue) => +iValue > +cValue;
+  const _lt = (iValue, cValue) => +iValue < +cValue;
+  return {
+    _eq,
+    _neq,
+    _null,
+    _nnull,
+    _gte,
+    _lte,
+    _lt,
+    _gt,
   }
 }
 
@@ -187,23 +180,23 @@ const Resolvers = () => {
 
 const mappings = {
   string: {
-    eq: { type: GraphQLString },
-    neq: { type: GraphQLString },
-    null: { type: GraphQLBoolean },
-    nnull: { type: GraphQLBoolean },
+    _eq: { type: GraphQLString },
+    _neq: { type: GraphQLString },
+    _null: { type: GraphQLBoolean },
+    _nnull: { type: GraphQLBoolean },
   },
   int: {
-    eq: { type: GraphQLInt },
-    neq: { type: GraphQLInt },
-    lte: { type: GraphQLInt },
-    gte: { type: GraphQLInt },
-    lt: { type: GraphQLInt },
-    gt: { type: GraphQLInt },
+    _eq: { type: GraphQLInt },
+    _neq: { type: GraphQLInt },
+    _lte: { type: GraphQLInt },
+    _gte: { type: GraphQLInt },
+    _lt: { type: GraphQLInt },
+    _gt: { type: GraphQLInt },
   },
   bool: {
-    eq: { type: GraphQLBoolean },
+    _eq: { type: GraphQLBoolean },
   }
-};
+}
 const mapGraphQLTypes = (type, leaf) => {
   let mappedType = {};
   if(['string'].includes(type)) {
