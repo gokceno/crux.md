@@ -1,0 +1,9 @@
+{
+  "name": "@crux/source",
+  "version": "0.0.0",
+  "main": "./src/Source.js",
+  "type": "module",
+  "dependencies": {
+    "yaml": "^2.2.2"
+  }
+}

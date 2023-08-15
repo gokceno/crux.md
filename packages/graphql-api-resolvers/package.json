@@ -1,0 +1,9 @@
+{
+  "name": "@crux/graphql-api-resolvers",
+  "version": "0.0.0",
+  "main": "./src/Resolvers.js",
+  "type": "module",
+  "dependencies": {
+    "@crux/bucket": "0.0.0"
+  }
+}

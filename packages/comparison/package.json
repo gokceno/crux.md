@@ -1,0 +1,6 @@
+{
+  "name": "@crux/comparison",
+  "version": "0.0.0",
+  "main": "./src/Comparison.js",
+  "type": "module"
+}

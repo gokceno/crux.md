@@ -1,0 +1,6 @@
+{
+  "name": "@crux/bucket",
+  "version": "0.0.0",
+  "main": "./src/Bucket.js",
+  "type": "module"
+}

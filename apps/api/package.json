@@ -22,6 +22,8 @@
     "pino": "8.11.0",
     "pino-http": "8.3.3",
     "pino-pretty": "10.0.0",
-    "yaml": "^2.2.2"
+    "yaml": "^2.2.2",
+    "@crux/graphql-api-resolvers": "0.0.0",
+    "@crux/graphql-api": "0.0.0"
   }
 }
