@@ -7,6 +7,7 @@ import { Resolvers } from '@crux/graphql-api-resolvers';
 import { transform } from '@crux/graphql-api';
 
 const config = YAML.parse(
+  // TODO: Can read from bucket with getManifest()
   await fs.readFile('../../samples/schema.yml', 'utf8')
 );
 

@@ -1,4 +1,4 @@
-import fs from 'fs/promises'
+import fs from 'fs/promises';
 import path from 'path';
 import YAML from 'yaml';
 
@@ -23,13 +23,13 @@ export const Source = () => {
         });
         return await Promise.all(filePromises);
       } catch (e) {
-          console.error(e);
+        console.error(e);
         return [];
       }
     }
     const get = async({ filename }) => {
       try {
-        const frontmatter = await _extractFrontMatter({ filename: filename + '.md' });
+        const frontmatter = await _extractFrontMatter({ filename: [filename, _defaultFileExtension].join('.') });
         return {
           ...YAML.parse(frontmatter)
         }
@@ -39,6 +39,7 @@ export const Source = () => {
       }
     }
     const _extractFrontMatter = async ({ collection, filename }) => {
+      // TODO: Move file opens to parent.
       let file;
       if(collection !== undefined) {
         file = await fs.readFile(path.join(_root, 'collections', collection, filename), 'utf-8');
