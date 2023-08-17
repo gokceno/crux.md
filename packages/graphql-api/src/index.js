@@ -78,7 +78,6 @@ const mapFields = (node) => {
   return leafObj;
 }
 const mapFilterArgs = (collectionName, node) => {
-  // TODO: Must display filter criteria based on data types
   let leafObj = {};
   Object.values(node)[0].map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
