@@ -5,6 +5,7 @@ export const Bucket = () => {
   let _collection;
   let _single;
   let _filters = [];
+  let _order = [];
   function select({ collection, single }) {
     // TODO: Check if directories are readable 
     if(collection == undefined && single == undefined) 
@@ -16,6 +17,12 @@ export const Bucket = () => {
   function filter({ filters }) {
     if(filters !== undefined) {
       _filters = Object.entries(filters);
+    }
+    return this;
+  }
+  function order({ order }) {
+    if(order !== undefined) {
+      _order = Object.entries(order);
     }
     return this;
   }
@@ -31,12 +38,24 @@ export const Bucket = () => {
     throw new Error('Select failed.');
   }
   const _fetchCollection = async() => {
-    if(_source.isFiltered || _filters === undefined) return (await _source.list({ collection: _collection }));
+    if(_source.isFiltered === true && _source.isOrdered === true) return await _source.list({ collection: _collection });
     const filteredList = (await _source.list({ collection: _collection })).filter(item => {
       return _filters.every(([field, criteria]) => {
         const [ condition ] = Object.keys(criteria);
         const [ value ] = Object.values(criteria);
         return Comparison()[condition](item[field], value);
+      });
+    });
+    if(_order.length == 0) return filteredList;
+    // TODO: should order dates
+    // TODO: should order numbers
+    _order.every(([field, criteria]) => {
+      return filteredList.sort((a, b) => {
+        if(a == b) return 0;
+        if(criteria === '_desc') {
+          return b[field].localeCompare(a[field]);
+        }
+        return a[field].localeCompare(b[field]);
       });
     });
     return filteredList;
@@ -47,6 +66,7 @@ export const Bucket = () => {
   return {
     select,
     filter,
+    order,
     load,
     fetch,
   }

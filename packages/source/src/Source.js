@@ -65,6 +65,7 @@ export const Source = () => {
     }
     return {
       isFiltered: false,
+      isOrdered: false,
       list,
       get,
     }

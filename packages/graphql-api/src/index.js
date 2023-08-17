@@ -5,7 +5,8 @@ import {
   GraphQLList, 
   GraphQLInt, 
   GraphQLBoolean,
-  GraphQLInputObjectType 
+  GraphQLInputObjectType,
+  GraphQLEnumType, 
 } from 'graphql';
 
 const mappings = {
@@ -102,6 +103,37 @@ const mapFilterArgs = (collectionName, node) => {
     )
   }};
 }
+const mapLimitArgs = () => {
+
+}
+const mapOrderArgs = (collectionName, node) => {
+  let leafObj = {};
+  Object.values(node)[0].map(leaf => {
+    Object.entries(leaf).map(([name, type]) => {
+      if(['string', 'int'].includes(type)) {
+        leafObj[name] = { 
+          type: new GraphQLEnumType({
+            name: `order_${collectionName}_${name}`,
+            values: {
+              ASC: { value: '_asc' },
+              DESC: { value: '_desc' },
+            },
+          })
+        }
+      }
+    })
+    return leafObj;
+  });
+  if(Object.keys(leafObj).length === 0) return undefined;
+  return { 
+    order: { 
+      type: new GraphQLInputObjectType({
+        name: `order_${collectionName}`,
+        fields: leafObj,
+      }
+    )
+  }};
+}
 export const transform = ({ node, resolver, resolveBy }) => {
   // TODO: check if resolve by is a valid method
   let nodeObj = {};
@@ -111,7 +143,8 @@ export const transform = ({ node, resolver, resolveBy }) => {
   }
   if(resolver.filterables.includes(resolveBy)) {
     nodeObj[name]['args'] = {
-      ...mapFilterArgs(name, node)
+      ...mapFilterArgs(name, node),
+      ...mapOrderArgs(name, node),
     }
   }
   if(resolver.iterables.includes(resolveBy)) {
