@@ -42,8 +42,6 @@ export const Bucket = () => {
     throw new Error('Select failed.');
   }
   const _fetchCollection = async() => {
-    // TODO: Must receive as parameters, not use as class variables
-    // TODO: Can be divided, not testable.
     if(_source.isFiltered === true && _source.isOrdered === true) return await _source.list({ collection: _collection });
     const filteredList = (await _source.list({ collection: _collection })).filter(item => {
       return _filters.every(([field, criteria]) => {

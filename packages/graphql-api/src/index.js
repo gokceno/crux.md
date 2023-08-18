@@ -80,7 +80,7 @@ const mapFields = (node, nodes, depth = 0) => {
             type: new GraphQLList(
               new GraphQLObjectType({
                 name: Object.keys(targetNode[0])[0] + '_' + Math.random().toString(36).slice(2, 6),
-                fields: mapFields(targetNode[0], nodes, depth + 1),
+                fields: () => mapFields(targetNode[0], nodes, depth + 1),
               })
             )
           }
