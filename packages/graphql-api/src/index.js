@@ -57,7 +57,7 @@ const mapGraphQLTypes = (type, leaf) => {
     mappedType = {
       type: new GraphQLList(
         new GraphQLObjectType({
-          name: Object.keys(leaf)[0],
+          name: Object.keys(leaf)[0] + '_' + Math.random().toString(36).slice(2, 6),
           fields: mapFields(leaf),
         })
       )
@@ -68,11 +68,27 @@ const mapGraphQLTypes = (type, leaf) => {
   }
   return mappedType;
 }
-const mapFields = (node) => {
+const mapFields = (node, nodes, depth = 0) => {
   let leafObj = {};
   Object.values(node)[0].map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
-      leafObj[name] = mapGraphQLTypes(type, leaf);
+      if(type.includes('/')) {
+        if(depth < 1) {
+          const [targetNodeName, targetNodeVia] = type.split('/');
+          const targetNode = nodes.filter(leaf => Object.keys(leaf)[0] == targetNodeName);
+          leafObj[name] = {
+            type: new GraphQLList(
+              new GraphQLObjectType({
+                name: Object.keys(targetNode[0])[0] + '_' + Math.random().toString(36).slice(2, 6),
+                fields: mapFields(targetNode[0], nodes, depth + 1),
+              })
+            )
+          }
+        }
+      }
+      else {
+        leafObj[name] = mapGraphQLTypes(type, leaf);
+      }
     });
     return leafObj;
   });
@@ -104,7 +120,6 @@ const mapFilterArgs = (collectionName, node) => {
   }};
 }
 const mapLimitArgs = () => {
-
 }
 const mapOrderArgs = (collectionName, node) => {
   let leafObj = {};
@@ -115,8 +130,8 @@ const mapOrderArgs = (collectionName, node) => {
           type: new GraphQLEnumType({
             name: `order_${collectionName}_${name}`,
             values: {
-              ASC: { value: '_asc' },
-              DESC: { value: '_desc' },
+              asc: { value: '_asc' },
+              desc: { value: '_desc' },
             },
           })
         }
@@ -134,7 +149,7 @@ const mapOrderArgs = (collectionName, node) => {
     )
   }};
 }
-export const transform = ({ node, resolver, resolveBy }) => {
+export const transform = ({ nodes, node, resolver, resolveBy }) => {
   // TODO: check if resolve by is a valid method
   let nodeObj = {};
   const name = Object.keys(node)[0];
@@ -151,7 +166,7 @@ export const transform = ({ node, resolver, resolveBy }) => {
     nodeObj[name]['type'] = new GraphQLList(
       new GraphQLObjectType({
         name,
-        fields: mapFields(node),
+        fields: mapFields(node, nodes),
       })
     );
   }

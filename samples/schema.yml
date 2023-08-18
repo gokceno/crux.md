@@ -24,6 +24,7 @@ collections:
     - social_media:
       - type: "string"
       - url: "string"
+    - related_products: "movies/id"
 singles:
   - about_us:
     - title: "string"

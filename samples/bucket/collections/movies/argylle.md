@@ -6,6 +6,8 @@ is_active: false
 on_homepage: false
 in_theatres: false
 layout: movies
+related_movies:
+  - Venedik'te Cinayet
 ---
 
 Film bilgileri hazırlık aşamasında.

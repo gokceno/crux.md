@@ -20,7 +20,7 @@ const schema = new GraphQLSchema({
     name: 'Query',
     fields: () => {
       const fields = {};
-      config.collections.map(node => transform({ node, resolver: Resolvers({ bucket }), resolveBy: 'collection' })).forEach(field => {
+      config.collections.map(node => transform({ nodes: config.collections, node, resolver: Resolvers({ bucket }), resolveBy: 'collection' })).forEach(field => {
         fields[Object.keys(field)[0]] = field[Object.keys(field)[0]];
       });
       config.singles.map(node => transform({ node, resolver: Resolvers({ bucket }), resolveBy: 'single' })).forEach(field => {
