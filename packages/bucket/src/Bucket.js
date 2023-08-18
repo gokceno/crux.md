@@ -1,3 +1,4 @@
+import YAML from 'yaml';
 import { Comparison } from '@crux/comparison';
 
 export const Bucket = () => {
@@ -36,13 +37,15 @@ export const Bucket = () => {
     _source = source;
     return this;
   }
+  const manifest = async() => YAML.parse(await _source.open({ filename: 'manifest.yml' }))
   const fetch = async () => {
     if(_collection !== undefined) return _fetchCollection();
     if(_single !== undefined) return _fetchSingle();
     throw new Error('Select failed.');
   }
   const _fetchCollection = async() => {
-    if(_source.isFiltered === true && _source.isOrdered === true) return await _source.list({ collection: _collection });
+    if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) 
+      return await _source.list({ collection: _collection });
     const filteredList = (await _source.list({ collection: _collection })).filter(item => {
       return _filters.every(([field, criteria]) => {
         const [ condition ] = Object.keys(criteria);
@@ -68,6 +71,7 @@ export const Bucket = () => {
     return (await _source.get({ filename: _single }));
   }
   return {
+    manifest,
     select,
     filter,
     order,

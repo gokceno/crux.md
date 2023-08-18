@@ -6,6 +6,7 @@ export const Source = () => {
   const FileSystem = ({ bucketPath }) => {
     const _defaultFileExtension = 'md';
     const _root = bucketPath || './';
+    const open = async({ filename }) => await fs.readFile(path.join(_root, filename), 'utf8');
     const list = async ({ collection }) => {
       try {
         const filenames = await fs.readdir(path.join(_root, 'collections', collection));
@@ -42,10 +43,10 @@ export const Source = () => {
       // TODO: Move file opens to parent.
       let file;
       if(collection !== undefined) {
-        file = await fs.readFile(path.join(_root, 'collections', collection, filename), 'utf-8');
+        file = await open({ filename: path.join('collections', collection, filename) });
       }
       if(collection === undefined) {
-        file = await fs.readFile(path.join(_root, 'singles', filename), 'utf-8');
+        file = await open({ filename: path.join('singles', filename) });
       }
       if(file === undefined) {
         throw new Error('Failed to get file contents or types got mixed up.');
@@ -66,8 +67,10 @@ export const Source = () => {
     return {
       isFiltered: false,
       isOrdered: false,
+      isExpanded: false,
       list,
       get,
+      open,
     }
   }
   return { FileSystem }
