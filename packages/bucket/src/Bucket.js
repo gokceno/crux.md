@@ -1,5 +1,5 @@
 import YAML from 'yaml';
-import { Comparison } from '@crux/comparison';
+import * as Comparison from '@crux/comparison';
 
 export const Bucket = () => {
   let _source = {};
@@ -56,7 +56,7 @@ export const Bucket = () => {
       return _filters.every(([field, criteria]) => {
         const [ condition ] = Object.keys(criteria);
         const [ value ] = Object.values(criteria);
-        return Comparison()[condition](item[field], value);
+        return Comparison[condition](item[field], value);
       });
     });
     return filteredList.map(item => {
