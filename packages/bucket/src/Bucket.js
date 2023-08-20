@@ -59,7 +59,7 @@ export const Bucket = () => {
         return Comparison[condition](item[field], value);
       });
     });
-    return filteredList.map(item => {
+    const expandedList = filteredList.map(item => {
       _expansions.every(expansion => {
         const toReplace = item[Object.keys(expansion)[0]];
         item[Object.keys(expansion)[0]] = async () => {
@@ -69,13 +69,9 @@ export const Bucket = () => {
       });
       return item;
     });
-
-    if(_order.length == 0) return filteredList;
-    // TODO: should order dates
-    // TODO: should order numbers
-    // FIXME: check multiple orders
+    if(_order.length == 0 || expandedList.length <= 1) return expandedList;
     _order.every(([field, criteria]) => {
-      return filteredList.sort((a, b) => {
+      expandedList.sort((a, b) => {
         if(a == b) return 0;
         if(criteria === '_desc') {
           return b[field].localeCompare(a[field]);
@@ -83,6 +79,7 @@ export const Bucket = () => {
         return a[field].localeCompare(b[field]);
       });
     });
+    return expandedList;
   }
   const _fetchSingle = async() => {
     return (await _source.get({ filename: _single }));
