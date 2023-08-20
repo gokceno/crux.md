@@ -63,8 +63,8 @@ export const Bucket = () => {
       _expansions.every(expansion => {
         const toReplace = item[Object.keys(expansion)[0]];
         item[Object.keys(expansion)[0]] = async () => {
-          const [ collectionName, propName ] = Object.values(expansion)[0].split('/');
-          return (await _source.list({ collection: collectionName })).filter(item => (toReplace || []).includes(item[propName]));
+          const [ collection, propName ] = Object.values(expansion)[0].split('/');
+          return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
         }
       });
       return item;
@@ -82,7 +82,15 @@ export const Bucket = () => {
     return expandedList;
   }
   const _fetchSingle = async() => {
-    return (await _source.get({ filename: _single }));
+    let data = await _source.get({ filename: _single });
+    _expansions.every(expansion => {
+        const toReplace = data[Object.keys(expansion)[0]];
+        data[Object.keys(expansion)[0]] = async () => {
+          const [ collection, propName ] = Object.values(expansion)[0].split('/');
+          return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
+        }
+      });
+    return data;
   }
   //TODO: handle parse errors
   const manifest = async() => YAML.parse(await _source.open({ filename: 'manifest.yml' }))

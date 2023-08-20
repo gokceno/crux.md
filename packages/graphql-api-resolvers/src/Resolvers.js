@@ -22,9 +22,18 @@ export const Resolvers = ({ bucket }) => {
   }
   const single = async (single) => {
     if(bucket == undefined) throw new Error('Bucket must be defined');
-    return bucket
-      .select({ single })
-      .fetch();
+    const manifest = await bucket.manifest();
+    const expansions = manifest.singles
+      .filter(item => Object.keys(item) == single)
+      .map(item => {
+        return Object.values(item)[0].filter(prop => {
+          return Object.values(prop)[0].includes('/')
+        }
+      )
+    });
+    bucket.select({ single });
+    expansions[0].every(expand => bucket.expand({ expand }));
+    return bucket.fetch();
   }
   return { 
     collection,

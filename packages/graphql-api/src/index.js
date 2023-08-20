@@ -173,7 +173,7 @@ export const transform = ({ nodes, node, resolver, resolveBy }) => {
   else {
     nodeObj[name]['type'] = new GraphQLObjectType({
       name,
-      fields: mapFields(node),
+      fields: mapFields(node, nodes),
     });
   }
   return nodeObj;
