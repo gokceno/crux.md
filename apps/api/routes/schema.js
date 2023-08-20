@@ -9,7 +9,7 @@ const bucket = Bucket().load({
   source: Source().FileSystem({ bucketPath: '../../samples/bucket' })
 });
 
-const manifest = (await bucket.manifest());
+const manifest = await bucket.manifest();
 
 const schema = new GraphQLSchema({
   query: new GraphQLObjectType({

@@ -7,6 +7,7 @@ export const Bucket = () => {
   let _single;
   let _filters = [];
   let _order = [];
+  let _expansions = [];
   function select({ collection, single }) {
     // TODO: Check if directories are readable 
     if(collection == undefined && single == undefined) 
@@ -31,13 +32,18 @@ export const Bucket = () => {
     _order = [];
     return this;
   }
+  function expand({ expand }) {
+    if(expand !== undefined) {
+      _expansions.push(expand);
+    }
+    return this;
+  }
   function load({ source }) {
     // TODO: Check if directories are readable
     if(source == undefined) throw new Error('Source is not defined');
     _source = source;
     return this;
   }
-  const manifest = async() => YAML.parse(await _source.open({ filename: 'manifest.yml' }))
   const fetch = async () => {
     if(_collection !== undefined) return _fetchCollection();
     if(_single !== undefined) return _fetchSingle();
@@ -53,9 +59,21 @@ export const Bucket = () => {
         return Comparison()[condition](item[field], value);
       });
     });
+    return filteredList.map(item => {
+      _expansions.every(expansion => {
+        const toReplace = item[Object.keys(expansion)[0]];
+        item[Object.keys(expansion)[0]] = async () => {
+          const [ collectionName, propName ] = Object.values(expansion)[0].split('/');
+          return (await _source.list({ collection: collectionName })).filter(item => (toReplace || []).includes(item[propName]));
+        }
+      });
+      return item;
+    });
+
     if(_order.length == 0) return filteredList;
     // TODO: should order dates
     // TODO: should order numbers
+    // FIXME: check multiple orders
     _order.every(([field, criteria]) => {
       return filteredList.sort((a, b) => {
         if(a == b) return 0;
@@ -65,17 +83,19 @@ export const Bucket = () => {
         return a[field].localeCompare(b[field]);
       });
     });
-    return filteredList;
   }
   const _fetchSingle = async() => {
     return (await _source.get({ filename: _single }));
   }
+  //TODO: handle parse errors
+  const manifest = async() => YAML.parse(await _source.open({ filename: 'manifest.yml' }))
   return {
     manifest,
     select,
     filter,
     order,
     load,
+    expand,
     fetch,
   }
 }
