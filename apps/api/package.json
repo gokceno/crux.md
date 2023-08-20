@@ -26,6 +26,6 @@
     "@crux/graphql-api-resolvers": "0.0.0",
     "@crux/graphql-api": "0.0.0",
     "@crux/bucket": "0.0.0",
-    "@crux/source": "0.0.0"
+    "@crux/bucket-source-filesystem": "0.0.0"
   }
 }

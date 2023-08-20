@@ -1,7 +1,7 @@
 {
-  "name": "@crux/source",
+  "name": "@crux/bucket-source-filesystem",
   "version": "0.0.0",
-  "main": "./src/Source.js",
+  "main": "./src/Filesystem.js",
   "type": "module",
   "dependencies": {
     "yaml": "^2.2.2"
