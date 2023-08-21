@@ -119,7 +119,24 @@ const mapFilterArgs = (collectionName, node) => {
     )
   }};
 }
-const mapLimitArgs = () => {
+const mapLimitArgs = (collectionName) => {
+  let leafObj = {};
+  leafObj['limit'] = { 
+    type: new GraphQLInputObjectType({
+      name: `limit_${collectionName}`, 
+      fields: {
+        limit: {
+          name: 'limit',
+          type: GraphQLInt
+        },
+        offset: {
+          name: 'offset',
+          type: GraphQLInt
+        }
+      }
+    })
+  }
+  return leafObj;
 }
 const mapOrderArgs = (collectionName, node) => {
   let leafObj = {};
@@ -160,6 +177,7 @@ export const transform = ({ nodes, node, resolver, resolveBy }) => {
     nodeObj[name]['args'] = {
       ...mapFilterArgs(name, node),
       ...mapOrderArgs(name, node),
+      ...mapLimitArgs(name),
     }
   }
   if(resolver.iterables.includes(resolveBy)) {

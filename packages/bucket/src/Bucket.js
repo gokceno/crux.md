@@ -44,12 +44,13 @@ export const Bucket = () => {
     _source = source;
     return this;
   }
-  const fetch = async () => {
-    if(_collection !== undefined) return _fetchCollection();
+  const fetch = async (params) => {
+    if(_collection !== undefined) return _fetchCollection(params);
     if(_single !== undefined) return _fetchSingle();
     throw new Error('Select failed.');
   }
-  const _fetchCollection = async() => {
+  const _fetchCollection = async(params = {}) => {
+    const { limit, offset } = params;
     if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) 
       return await _source.list({ collection: _collection });
     const filteredList = (await _source.list({ collection: _collection })).filter(item => {
@@ -59,7 +60,27 @@ export const Bucket = () => {
         return Comparison[condition](item[field], value);
       });
     });
-    const expandedList = filteredList.map(item => {
+    if(_order.length > 0 || filteredList.length > 0) {
+      _order.every(([field, criteria]) => {
+        filteredList.sort((a, b) => {
+          if(a == b) return 0;
+          if(criteria === '_desc') {
+            return b[field].localeCompare(a[field]);
+          }
+          return a[field].localeCompare(b[field]);
+        });
+      });
+    }
+    let slicedList;
+    if(limit !== undefined && offset !== undefined) {
+      if(filteredList.length >= (offset + limit)) {
+        slicedList = filteredList.slice(offset, offset + limit);
+      }
+      else {
+        throw new Error('Not enough records to offset.');
+      }
+    }
+    const expandedList = (slicedList || filteredList).map(item => {
       _expansions.every(expansion => {
         const toReplace = item[Object.keys(expansion)[0]];
         item[Object.keys(expansion)[0]] = async () => {
@@ -69,16 +90,7 @@ export const Bucket = () => {
       });
       return item;
     });
-    if(_order.length == 0 || expandedList.length <= 1) return expandedList;
-    _order.every(([field, criteria]) => {
-      expandedList.sort((a, b) => {
-        if(a == b) return 0;
-        if(criteria === '_desc') {
-          return b[field].localeCompare(a[field]);
-        }
-        return a[field].localeCompare(b[field]);
-      });
-    });
+
     return expandedList;
   }
   const _fetchSingle = async() => {

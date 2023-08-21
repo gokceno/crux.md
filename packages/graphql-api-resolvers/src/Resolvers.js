@@ -1,7 +1,7 @@
 export const Resolvers = ({ bucket }) => {
   const iterables = ['collection'];
   const filterables = ['collection'];
-  const collection = async (collection, { filters, order }) => {
+  const collection = async (collection, { filters, order, limit }) => {
     // TODO: Error is raised when filter or order is selected but no criteria is supplied
     if(bucket == undefined) throw new Error('Bucket must be defined');
     const manifest = await bucket.manifest();
@@ -18,7 +18,7 @@ export const Resolvers = ({ bucket }) => {
       .filter({ filters })
       .order({ order });
     expansions[0].every(expand => bucket.expand({ expand }));
-    return bucket.fetch({ limit: 5, offset: 1 });
+    return bucket.fetch(limit);
   }
   const single = async (single) => {
     if(bucket == undefined) throw new Error('Bucket must be defined');
