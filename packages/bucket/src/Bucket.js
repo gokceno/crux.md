@@ -1,5 +1,6 @@
 import YAML from 'yaml';
 import * as Comparison from '@crux/comparison';
+import * as Sort from '@crux/sort';
 
 export const Bucket = () => {
   let _source = {};
@@ -61,15 +62,7 @@ export const Bucket = () => {
       });
     });
     if(_order.length > 0 || filteredList.length > 0) {
-      _order.every(([field, criteria]) => {
-        filteredList.sort((a, b) => {
-          if(a == b) return 0;
-          if(criteria === '_desc') {
-            return b[field].localeCompare(a[field]);
-          }
-          return a[field].localeCompare(b[field]);
-        });
-      });
+      _order.every(([field, criteria]) => filteredList.sort((a,b) => Sort[criteria](a[field], b[field])));
     }
     let slicedList;
     if(limit !== undefined && offset !== undefined) {

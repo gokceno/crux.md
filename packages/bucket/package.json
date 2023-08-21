@@ -2,5 +2,8 @@
   "name": "@crux/bucket",
   "version": "0.0.0",
   "main": "./src/Bucket.js",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@crux/sort": "0.0.0"
+  }
 }
