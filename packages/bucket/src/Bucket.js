@@ -84,12 +84,12 @@ export const Bucket = () => {
   const _fetchSingle = async() => {
     let data = await _source.get({ filename: _single });
     _expansions.every(expansion => {
-        const toReplace = data[Object.keys(expansion)[0]];
-        data[Object.keys(expansion)[0]] = async () => {
-          const [ collection, propName ] = Object.values(expansion)[0].split('/');
-          return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
-        }
-      });
+      const toReplace = data[Object.keys(expansion)[0]];
+      data[Object.keys(expansion)[0]] = async () => {
+        const [ collection, propName ] = Object.values(expansion)[0].split('/');
+        return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
+      }
+    });
     return data;
   }
   //TODO: handle parse errors
