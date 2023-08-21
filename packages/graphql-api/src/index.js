@@ -147,8 +147,8 @@ const mapOrderArgs = (collectionName, node) => {
           type: new GraphQLEnumType({
             name: `order_${collectionName}_${name}`,
             values: {
-              asc: { value: '_asc' },
-              desc: { value: '_desc' },
+              asc: { value: 'asc' },
+              desc: { value: 'desc' },
             },
           })
         }
