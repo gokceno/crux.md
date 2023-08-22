@@ -16,7 +16,7 @@ collections:
     - title: "string"
     - on_homepage: "bool"
     - in_theatres: "bool"
-    - in_theatres_date: "string"
+    - in_theatres_date: "date"
     - tag_line: "string"
     - poster_url: "string"
     - video_url: "string"

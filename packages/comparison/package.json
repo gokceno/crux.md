@@ -2,5 +2,8 @@
   "name": "@crux/comparison",
   "version": "0.0.0",
   "main": "./src/index.js",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "luxon": "^3.4.0"
+  }
 }

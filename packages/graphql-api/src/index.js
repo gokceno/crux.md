@@ -24,13 +24,21 @@ const mappings = {
     _lt: { type: GraphQLInt },
     _gt: { type: GraphQLInt },
   },
+  date: {
+    _eq: { type: GraphQLString },
+    _neq: { type: GraphQLString },
+    _lte: { type: GraphQLString },
+    _gte: { type: GraphQLString },
+    _lt: { type: GraphQLString },
+    _gt: { type: GraphQLString },
+  },
   bool: {
     _eq: { type: GraphQLBoolean },
   }
 }
 const mapGraphQLTypes = (type, leaf) => {
   let mappedType = {};
-  if(['string'].includes(type)) {
+  if(['string', 'date'].includes(type)) {
     mappedType = {
       type: GraphQLString
     }
@@ -98,7 +106,7 @@ const mapFilterArgs = (collectionName, node) => {
   let leafObj = {};
   Object.values(node)[0].map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
-      if(['string', 'int', 'bool'].includes(type)) {
+      if(['string', 'int', 'bool', 'date'].includes(type)) {
         leafObj[name] = { 
           type: new GraphQLInputObjectType({
             name: `filter_${collectionName}_${name}`, 
@@ -142,7 +150,7 @@ const mapOrderArgs = (collectionName, node) => {
   let leafObj = {};
   Object.values(node)[0].map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
-      if(['string', 'int'].includes(type)) {
+      if(['string', 'int', 'date'].includes(type)) {
         leafObj[name] = { 
           type: new GraphQLEnumType({
             name: `order_${collectionName}_${name}`,

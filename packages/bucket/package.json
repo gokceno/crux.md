@@ -4,6 +4,7 @@
   "main": "./src/Bucket.js",
   "type": "module",
   "dependencies": {
-    "@crux/sort": "0.0.0"
+    "@crux/sort": "0.0.0",
+    "@crux/typof": "0.0.0"
   }
 }

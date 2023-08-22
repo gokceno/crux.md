@@ -39,7 +39,7 @@ export const FileSystem = ({ bucketPath }) => {
     }
   }
   const _extractFrontMatter = async ({ collection, filename }) => {
-      // TODO: Move file opens to parent.
+    // TODO: Move file opens to parent.
     let file;
     if(collection !== undefined) {
       file = await open({ filename: path.join('collections', collection, filename) });
@@ -50,7 +50,7 @@ export const FileSystem = ({ bucketPath }) => {
     if(file === undefined) {
       throw new Error('Failed to get file contents or types got mixed up.');
     }
-      // via and thanks to: https://github.com/jxson/front-matter/blob/master/index.js
+    // via and thanks to: https://github.com/jxson/front-matter/blob/master/index.js
     const pattern = '^(' +
     '\\ufeff?' +
     '(= yaml =|---)' +

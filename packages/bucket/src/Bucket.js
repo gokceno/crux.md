@@ -1,6 +1,7 @@
 import YAML from 'yaml';
 import * as Comparison from '@crux/comparison';
 import * as Sort from '@crux/sort';
+import { typof } from '@crux/typof';
 
 export const Bucket = () => {
   let _source = {};
@@ -58,7 +59,7 @@ export const Bucket = () => {
       return _filters.every(([field, criteria]) => {
         const [ condition ] = Object.keys(criteria);
         const [ value ] = Object.values(criteria);
-        return Comparison[condition](item[field], value);
+        return Comparison[typof(value)]()[condition](item[field], value);
       });
     });
     if(_order.length > 0 || filteredList.length > 0) {
@@ -83,7 +84,6 @@ export const Bucket = () => {
       });
       return item;
     });
-
     return expandedList;
   }
   const _fetchSingle = async() => {

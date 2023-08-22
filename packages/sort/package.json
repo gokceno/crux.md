@@ -2,5 +2,9 @@
   "name": "@crux/sort",
   "version": "0.0.0",
   "main": "./src/index.js",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@crux/typof": "0.0.0",
+    "luxon": "^3.4.0"
+  }
 }
