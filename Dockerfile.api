@@ -1,0 +1,18 @@
+# Specify a base image
+FROM node:18 AS build 
+
+LABEL org.opencontainers.image.source = "https://github.com/gokceno/crux.md"
+
+# Change working directory
+WORKDIR /usr/app
+
+# Copy in the app and weights
+COPY ./ /usr/app
+
+# Install dependencies
+RUN yarn global add turbo
+RUN yarn install
+
+EXPOSE 8001
+
+CMD turbo start --filter='./apps/api'
