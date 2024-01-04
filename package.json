@@ -5,6 +5,7 @@
   "workspaces": [
     "apps/api",
     "apps/cms",
+    "apps/auth",
     "packages/*"
   ],
   "packageManager": "yarn@1.22.19",

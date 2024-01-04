@@ -1,63 +1,68 @@
 backend:
   name: github
   repo: gokceno/crux.md
-  branch: main 
-media_folder: "static/images/uploads"  
+  branch: main
+  base_url: "http://localhost:3001"
+media_folder: static/images/uploads
 collections:
-  - name: "movie" # Used in routes, e.g., /admin/collections/blog
-    label: "Movies" # Used in the UI
-    folder: "samples/bucket/collections/movies" # The path to the folder where the documents are stored
-    create: true # Allow users to create new documents in this collection
-    slug: "{{slug}}" # Filename template, e.g., YYYY-MM-DD-title.md
-    fields: # The fields for each document, usually in front matter
-      - label: "Layout"
-        name: "layout"
-        widget: "hidden"
-        default: "movies"
-      - label: "Title"
-        name: "title"
-        widget: "string"
-      - label: "Tag Line"
-        name: "tag_line"
-        widget: "text"
-      - label: "Active"
-        name: "is_active"
-        widget: "boolean"
-      - label: "Display on Homepage"
-        name: "on_homepage"
-        widget: "boolean"
-      - label: "In theaters"
-        name: "in_theaters"
-        widget: "boolean"
-      - label: "In theaters Date"
-        name: "in_theaters_date"
-        widget: "datetime"
-      - label: "Poster"
-        name: "poster_url"
-        widget: "image"
-      - label: "Video"
-        name: "video_url"
-        widget: "string"
-      - label: "Social Media"
-        name: "social_media"
-        widget: "list"
-        summary: '{{fields.type}} - {{fields.url}}'
+  - name: movie
+    label: Movies
+    folder: samples/bucket/collections/movies
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - label: Layout
+        name: layout
+        widget: hidden
+        default: movies
+      - label: Title
+        name: title
+        widget: string
+      - label: Tag Line
+        name: tag_line
+        widget: text
+      - label: Active
+        name: is_active
+        widget: boolean
+      - label: Display on Homepage
+        name: on_homepage
+        widget: boolean
+      - label: In theaters
+        name: in_theaters
+        widget: boolean
+      - label: In theaters Date
+        name: in_theaters_date
+        widget: datetime
+      - label: Poster
+        name: poster_url
+        widget: image
+      - label: Video
+        name: video_url
+        widget: string
+      - label: Social Media
+        name: social_media
+        widget: list
+        summary: "{{fields.type}} - {{fields.url}}"
         fields:
           - label: Type
             name: type
             widget: select
-            options: ["fb", "instagram"]
+            options:
+              - fb
+              - instagram
           - label: URL
             name: url
             widget: string
-      - label: "Related Movies"
-        name: "related_movies"
-        widget: "relation"
-        collection: "movie"
-        search_fields: ["title"]
-        value_field: "title"
-        display_fields: ["title"]
+      - label: Related Movies
+        name: related_movies
+        widget: relation
+        collection: movie
+        search_fields:
+          - title
+        value_field: title
+        display_fields:
+          - title
         multiple: true
-      - label: "Body"
-        name: "body"
-        widget: "markdown"
+      - label: Body
+        name: body
+        widget: markdown
