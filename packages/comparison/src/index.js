@@ -3,8 +3,8 @@ import { DateTime } from 'luxon';
 export const string = () => {
 	const _eq = (a, b) => a == b;
 	const _neq = (a, b) => a != b;
-	const _null = (a, b) => a === null || a === undefined || a.length === 0;
-	const _nnull = (a, b) => a !== null && a !== undefined && a.length !== 0
+	const _null = (a) => a === null || a === undefined || a.length === 0;
+	const _nnull = (a) => a !== null && a !== undefined && a.length !== 0
 	return {
 		_eq,
 		_neq,
@@ -15,9 +15,13 @@ export const string = () => {
 export const boolean = () => {
 	const _eq = (a, b) => a == b;
 	const _neq = (a, b) => a != b;
+	const _null = (a) => a === null || a === undefined || a.length === 0;
+	const _nnull = (a) => a !== null && a !== undefined && a.length !== 0
 	return {
 		_eq,
 		_neq,
+		_null,
+		_nnull,
 	}
 }
 export const number = () => {
