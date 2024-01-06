@@ -38,7 +38,7 @@ const mappings = {
 }
 const mapGraphQLTypes = (type, leaf) => {
   let mappedType = {};
-  if(['string', 'date'].includes(type)) {
+  if(['string', 'date', 'body'].includes(type)) {
     mappedType = {
       type: GraphQLString
     }
@@ -78,6 +78,7 @@ const mapGraphQLTypes = (type, leaf) => {
 }
 const mapFields = (node, nodes, depth = 0) => {
   let leafObj = {};
+  Object.values(node)[0].push({ body: 'string' });
   Object.values(node)[0].map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
       if(type.includes('/')) {
@@ -98,7 +99,6 @@ const mapFields = (node, nodes, depth = 0) => {
         leafObj[name] = mapGraphQLTypes(type, leaf);
       }
     });
-    return leafObj;
   });
   return leafObj;
 }

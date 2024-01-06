@@ -12,9 +12,14 @@ export const FileSystem = ({ bucketPath }) => {
       const filteredFiles = filenames.filter(filename => filename.split('.')[1] === _defaultFileExtension);
       const filePromises = filteredFiles.map(async (filename) => {
         try {
-          const frontmatter = await _extractFrontMatter({ collection, filename });
+          let file;
+          file = await open({ filename: path.join('collections', collection, filename) });
+          if(file === undefined) {
+            throw new Error('Failed to get file contents or types got mixed up.');
+          }
           return {
-            ...YAML.parse(frontmatter)
+            ..._extractFrontMatter(file),
+            ..._extractBody(file),
           }
         } catch (e) {
           console.error(e);
@@ -29,27 +34,24 @@ export const FileSystem = ({ bucketPath }) => {
   }
   const get = async({ filename }) => {
     try {
-      const frontmatter = await _extractFrontMatter({ filename: [filename, _defaultFileExtension].join('.') });
+      let file;
+      file = await open({ filename: path.join('singles', [filename, _defaultFileExtension].join('.')) });
+      if(file === undefined) {
+        throw new Error('Failed to get file contents or types got mixed up.');
+      }
       return {
-        ...YAML.parse(frontmatter)
+        ..._extractFrontMatter(file),
+        ..._extractBody(file),
       }
     } catch (e) {
       console.error(e);
       return {};
     }
   }
-  const _extractFrontMatter = async ({ collection, filename }) => {
-    // TODO: Move file opens to parent.
-    let file;
-    if(collection !== undefined) {
-      file = await open({ filename: path.join('collections', collection, filename) });
-    }
-    if(collection === undefined) {
-      file = await open({ filename: path.join('singles', filename) });
-    }
-    if(file === undefined) {
-      throw new Error('Failed to get file contents or types got mixed up.');
-    }
+  const _extractBody = (file) => {
+    return { body: file.split('---')[2] || '' };
+  }
+  const _extractFrontMatter = (file) => {
     // via and thanks to: https://github.com/jxson/front-matter/blob/master/index.js
     const pattern = '^(' +
     '\\ufeff?' +
@@ -61,7 +63,7 @@ export const FileSystem = ({ bucketPath }) => {
     const regex = new RegExp(pattern, 'm');
     const [ match ] = regex.exec(file);
     if(match == undefined) throw new Error('Can not extract frontmatter, file may be formatted incorrectly.');
-    return match.replaceAll('---', '');
+    return YAML.parse(match.replaceAll('---', ''));
   }
   return {
     isFiltered: false,
