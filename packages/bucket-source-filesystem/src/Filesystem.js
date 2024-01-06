@@ -6,7 +6,7 @@ export const FileSystem = ({ bucketPath }) => {
   const _defaultFileExtension = 'md';
   const _root = bucketPath || './';
   const open = async({ filename }) => await fs.readFile(path.join(_root, filename), 'utf8');
-  const list = async ({ collection }) => {
+  const list = async ({ collection, omitBody = true }) => {
     try {
       const filenames = await fs.readdir(path.join(_root, 'collections', collection));
       const filteredFiles = filenames.filter(filename => filename.split('.')[1] === _defaultFileExtension);
@@ -19,7 +19,7 @@ export const FileSystem = ({ bucketPath }) => {
           }
           return {
             ..._extractFrontMatter(file),
-            ..._extractBody(file),
+            ...(omitBody === false ? _extractBody(file) : { body: null }),
           }
         } catch (e) {
           console.error(e);

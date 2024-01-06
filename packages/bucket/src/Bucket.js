@@ -54,8 +54,8 @@ export const Bucket = () => {
   const _fetchCollection = async(params = {}) => {
     const { limit, offset } = params;
     if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) 
-      return await _source.list({ collection: _collection });
-    const filteredList = (await _source.list({ collection: _collection })).filter(item => {
+      return await _source.list({ collection: _collection, omitBody: !(limit === 1) });
+    const filteredList = (await _source.list({ collection: _collection, omitBody: !(limit === 1)  })).filter(item => {
       return _filters.every(([field, criteria]) => {
         const [ condition ] = Object.keys(criteria);
         const [ value ] = Object.values(criteria);
