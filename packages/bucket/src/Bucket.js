@@ -52,7 +52,7 @@ export const Bucket = () => {
     throw new Error('Select failed.');
   }
   const _fetchCollection = async(params = {}) => {
-    const { limit, offset } = params;
+    const { limit, offset = 0 } = params;
     if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) 
       return await _source.list({ collection: _collection, omitBody: !(limit === 1) });
     const filteredList = (await _source.list({ collection: _collection, omitBody: !(limit === 1)  })).filter(item => {
