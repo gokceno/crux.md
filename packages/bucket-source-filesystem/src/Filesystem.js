@@ -36,9 +36,6 @@ export const FileSystem = ({ bucketPath }) => {
     try {
       let file;
       file = await open({ filename: path.join('singles', [filename, _defaultFileExtension].join('.')) });
-      if(file === undefined) {
-        throw new Error('Failed to get file contents or types got mixed up.');
-      }
       return {
         ..._extractFrontMatter(file),
         ..._extractBody(file),
@@ -49,7 +46,7 @@ export const FileSystem = ({ bucketPath }) => {
     }
   }
   const _extractBody = (file) => {
-    return { body: file.split('---')[2] || '' };
+    return { body: file.split('---')[2] || null };
   }
   const _extractFrontMatter = (file) => {
     // via and thanks to: https://github.com/jxson/front-matter/blob/master/index.js
