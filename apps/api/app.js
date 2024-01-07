@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { createHandler } from 'graphql-http/lib/use/express';
-import { schema } from './routes/schema.js';
+import { schema } from '@crux/graphql-schema';
 
 const app = express();
 

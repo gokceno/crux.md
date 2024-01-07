@@ -1,4 +1,3 @@
-import fs from 'fs/promises'
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { Bucket } from '@crux/bucket';
 import { FileSystem } from '@crux/bucket-source-filesystem';
