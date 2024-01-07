@@ -77,6 +77,46 @@
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
   integrity sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==
 
+"@libsql/darwin-arm64@0.2.0-pre.7":
+  version "0.2.0-pre.7"
+  resolved "https://registry.yarnpkg.com/@libsql/darwin-arm64/-/darwin-arm64-0.2.0-pre.7.tgz#88f7e988773c99a60eaff0bf38d2b33024e10d1c"
+  integrity sha512-rtNYnXF0W3kKwZ5MxrhjzE8uWq2YI20zIeKLDFX8JzT6zfgR3qym9AUrDV8tPYGr4bF/mgdH/CZxr49zddy4ig==
+
+"@libsql/darwin-x64@0.2.0-pre.7":
+  version "0.2.0-pre.7"
+  resolved "https://registry.yarnpkg.com/@libsql/darwin-x64/-/darwin-x64-0.2.0-pre.7.tgz#e5266f4a7c5514ba4dcd9839caa7960339560563"
+  integrity sha512-14cb9xJCHwOIl71TPpzeZhKZ4pvwEeRTkP2XmmMBvkNaDPK27lE4ibMATL+IZ/JL0S7aQNcBLwTpwu2Zt0IMuQ==
+
+"@libsql/linux-arm64-gnu@0.2.0-pre.7":
+  version "0.2.0-pre.7"
+  resolved "https://registry.yarnpkg.com/@libsql/linux-arm64-gnu/-/linux-arm64-gnu-0.2.0-pre.7.tgz#1d82a4021627e44340b339f1407ccf7aaca039f0"
+  integrity sha512-fiygBotFaYmWnK0or0yEQQQ+3V2m886aaIXDuYtSMpoeykbY3JuRu/CSvriI6/ovnufoMoERo82YZUBR6EDPKA==
+
+"@libsql/linux-arm64-musl@0.2.0-pre.7":
+  version "0.2.0-pre.7"
+  resolved "https://registry.yarnpkg.com/@libsql/linux-arm64-musl/-/linux-arm64-musl-0.2.0-pre.7.tgz#746ea4b9d9e1f1668772663fd1091a148d7b95a9"
+  integrity sha512-5m2OnItWBwyhGiB4kpOvGaOGwHemEY5cz/dc0gK/L6OjEP1lTPZwhXongp3EtI/cApGpHyLctkSWkgM+y2zp9w==
+
+"@libsql/linux-x64-gnu@0.2.0-pre.7":
+  version "0.2.0-pre.7"
+  resolved "https://registry.yarnpkg.com/@libsql/linux-x64-gnu/-/linux-x64-gnu-0.2.0-pre.7.tgz#0186183c1da332de43971d0e035f431247e6267a"
+  integrity sha512-i72WtvZqsuoM5rnMslS2LGsOo3zvlH0nc5gAwUz45UnsXQBSiLP7ELktVW0n8soMaeQE47ayT6jsB61CMC0KSA==
+
+"@libsql/linux-x64-musl@0.2.0-pre.7":
+  version "0.2.0-pre.7"
+  resolved "https://registry.yarnpkg.com/@libsql/linux-x64-musl/-/linux-x64-musl-0.2.0-pre.7.tgz#e5440e24ac4f3c05120d0c4c5475cedc382a0b69"
+  integrity sha512-9QO7xg6mExrQVQES9gW1OsExsUEJ6cBRdmt6nYfeDGShh/eoV3kiPSUeMXckNNbl77F5+m86WZqIDpi2UskgDw==
+
+"@libsql/win32-x64-msvc@0.2.0-pre.7":
+  version "0.2.0-pre.7"
+  resolved "https://registry.yarnpkg.com/@libsql/win32-x64-msvc/-/win32-x64-msvc-0.2.0-pre.7.tgz#d1123a4e78c7518ca955cd98678cfddcdba6c3e9"
+  integrity sha512-vNKWGHIws3qoqMV4hX0kRt54IiFaA0FuSzQnclqlygGTXetHragnuimZANIOYVWagU35wk5s23+Ir/eO158+Sg==
+
+"@neon-rs/load@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@neon-rs/load/-/load-0.0.4.tgz#2a2a3292c6f1fef043f49886712d3c96a547532e"
+  integrity sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -1204,6 +1244,11 @@ destroy@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/destroy/-/destroy-1.2.0.tgz#4803735509ad8be552934c67df614f94e66fa015"
   integrity sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==
+
+detect-libc@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.2.tgz#8ccf2ba9315350e1241b88d0ac3b0e1fbd99605d"
+  integrity sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw==
 
 dir-glob@^3.0.1:
   version "3.0.1"
@@ -2458,6 +2503,22 @@ levn@~0.3.0:
   dependencies:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
+
+libsql@^0.2.0-pre.7:
+  version "0.2.0-pre.7"
+  resolved "https://registry.yarnpkg.com/libsql/-/libsql-0.2.0-pre.7.tgz#b600a1fc306ece69981c925e947f4495d8cf7e4d"
+  integrity sha512-f2AmB3KvTYfYJUcERjed2RXKrnqZK2KvXkhnrpU+L7SQRtSYZqtChN70Pp0bKHGDkBXWvBLklpcwLpRNtwXStA==
+  dependencies:
+    "@neon-rs/load" "^0.0.4"
+    detect-libc "2.0.2"
+  optionalDependencies:
+    "@libsql/darwin-arm64" "0.2.0-pre.7"
+    "@libsql/darwin-x64" "0.2.0-pre.7"
+    "@libsql/linux-arm64-gnu" "0.2.0-pre.7"
+    "@libsql/linux-arm64-musl" "0.2.0-pre.7"
+    "@libsql/linux-x64-gnu" "0.2.0-pre.7"
+    "@libsql/linux-x64-musl" "0.2.0-pre.7"
+    "@libsql/win32-x64-msvc" "0.2.0-pre.7"
 
 lines-and-columns@^1.1.6:
   version "1.2.4"

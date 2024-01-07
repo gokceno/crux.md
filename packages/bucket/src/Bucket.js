@@ -3,7 +3,8 @@ import * as Comparison from '@crux/comparison';
 import * as Sort from '@crux/sort';
 import { typof } from '@crux/typof';
 
-export const Bucket = () => {
+export const Bucket = (params) => {
+  const { _cacheAdapter } = params;
   let _source = {};
   let _collection;
   let _single;
@@ -52,39 +53,42 @@ export const Bucket = () => {
     throw new Error('Select failed.');
   }
   const _fetchCollection = async(params = {}) => {
-    const { limit, offset = 0 } = params;
-    if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) 
-      return await _source.list({ collection: _collection, omitBody: !(limit === 1) });
-    const filteredList = (await _source.list({ collection: _collection, omitBody: !(limit === 1)  })).filter(item => {
-      return _filters.every(([field, criteria]) => {
-        const [ condition ] = Object.keys(criteria);
-        const [ value ] = Object.values(criteria);
-        return Comparison[typof(value)]()[condition](item[field], value);
+    if(_cacheAdapter.isCached({ entityType: _collection })) {
+      const { limit, offset = 0 } = params;
+      if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) 
+        return await _source.list({ collection: _collection, omitBody: !(limit === 1) });
+      const filteredList = (await _source.list({ collection: _collection, omitBody: !(limit === 1)  })).filter(item => {
+        return _filters.every(([field, criteria]) => {
+          const [ condition ] = Object.keys(criteria);
+          const [ value ] = Object.values(criteria);
+          return Comparison[typof(value)]()[condition](item[field], value);
+        });
       });
-    });
-    if(_order.length > 0 || filteredList.length > 0) {
-      _order.every(([field, criteria]) => filteredList.sort((a,b) => Sort[criteria](a[field], b[field])));
-    }
-    let slicedList;
-    if(limit !== undefined && offset !== undefined) {
-      if(filteredList.length >= (offset + limit)) {
-        slicedList = filteredList.slice(offset, offset + limit);
+      if(_order.length > 0 || filteredList.length > 0) {
+        _order.every(([field, criteria]) => filteredList.sort((a,b) => Sort[criteria](a[field], b[field])));
       }
-      else {
-        throw new Error('Not enough records to offset.');
-      }
-    }
-    const expandedList = (slicedList || filteredList).map(item => {
-      _expansions.every(expansion => {
-        const toReplace = item[Object.keys(expansion)[0]];
-        item[Object.keys(expansion)[0]] = async () => {
-          const [ collection, propName ] = Object.values(expansion)[0].split('/');
-          return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
+      let slicedList;
+      if(limit !== undefined && offset !== undefined) {
+        if(filteredList.length >= (offset + limit)) {
+          slicedList = filteredList.slice(offset, offset + limit);
         }
+        else {
+          throw new Error('Not enough records to offset.');
+        }
+      }
+      const expandedList = (slicedList || filteredList).map(item => {
+        _expansions.every(expansion => {
+          const toReplace = item[Object.keys(expansion)[0]];
+          item[Object.keys(expansion)[0]] = async () => {
+            const [ collection, propName ] = Object.values(expansion)[0].split('/');
+            return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
+          }
+        });
+        return item;
       });
-      return item;
-    });
-    return expandedList;
+      return _cacheAdapter.populate({ collection: _collection, data: expandedList });
+    }
+    return _cacheAdapter.get();
   }
   const _fetchSingle = async() => {
     let data = await _source.get({ filename: _single });

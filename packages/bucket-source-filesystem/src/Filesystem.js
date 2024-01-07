@@ -18,6 +18,7 @@ export const FileSystem = ({ bucketPath }) => {
             throw new Error('Failed to get file contents or types got mixed up.');
           }
           return {
+            id: filename,
             ..._extractFrontMatter(file),
             ...(omitBody === false ? _extractBody(file) : { body: null }),
           }
@@ -37,6 +38,7 @@ export const FileSystem = ({ bucketPath }) => {
       let file;
       file = await open({ filename: path.join('singles', [filename, _defaultFileExtension].join('.')) });
       return {
+        id: filename,
         ..._extractFrontMatter(file),
         ..._extractBody(file),
       }

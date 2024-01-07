@@ -30,3 +30,9 @@ singles:
     - title: "string"
     - tags: []
     - related_movies: "movies/title"
+    - nav: 
+      - label: "string"
+      - url: "string"
+      - children:
+        - label: "string"
+        - url: "string"
