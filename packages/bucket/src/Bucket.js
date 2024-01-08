@@ -4,7 +4,7 @@ import * as Sort from '@crux/sort';
 import { typof } from '@crux/typof';
 
 export const Bucket = (params) => {
-  const { _cacheAdapter } = params;
+  const { cache: _cacheAdapter } = params;
   let _source = {};
   let _collection;
   let _single;

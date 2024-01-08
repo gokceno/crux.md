@@ -1,0 +1,9 @@
+{
+  "name": "@crux/bucket-cache-libsql",
+  "version": "0.0.0",
+  "main": "./src/index.js",
+  "type": "module",
+  "dependencies": {
+    "libsql": "^0.2.0-pre.7"
+  }
+}

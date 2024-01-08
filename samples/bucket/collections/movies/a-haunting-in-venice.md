@@ -1,6 +1,6 @@
 ---
 layout: movies
-title: Venedikte Cinayet
+title: Venedik'te Cinayet
 on_homepage: true
 in_theatres: false
 in_theatres_date: '2023-09-15'
