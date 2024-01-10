@@ -3,8 +3,7 @@ import * as Comparison from '@crux/comparison';
 import * as Sort from '@crux/sort';
 import { typof } from '@crux/typof';
 
-export const Bucket = (params) => {
-  const { cache: _cacheAdapter } = params;
+export const Bucket = ({ cache: _cacheAdapter }) => {
   let _source = {};
   let _collection;
   let _single;
@@ -53,11 +52,22 @@ export const Bucket = (params) => {
     throw new Error('Select failed.');
   }
   const _fetchCollection = async(params = {}) => {
-    if(_cacheAdapter.isCached({ entityType: _collection })) {
-      const { limit, offset = 0 } = params;
-      if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) 
-        return await _source.list({ collection: _collection, omitBody: !(limit === 1) });
-      const filteredList = (await _source.list({ collection: _collection, omitBody: !(limit === 1)  })).filter(item => {
+    const { limit, offset } = params;
+    if(!_cacheAdapter.isCached({ entityType: _collection })) {
+      const list = await _source.list({ collection: _collection, omitBody: !(limit === 1)  });
+      if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
+      const expandedList = list.map(item => {
+        _expansions.every(expansion => {
+          const toReplace = item[Object.keys(expansion)[0]];
+          item[Object.keys(expansion)[0]] = async () => {
+            const [ collection, propName ] = Object.values(expansion)[0].split('/');
+            return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
+          }
+        });
+        return item;
+      });
+      _cacheAdapter.populate({ collection: _collection, data: expandedList });
+      const filteredList = expandedList.filter(item => {
         return _filters.every(([field, criteria]) => {
           const [ condition ] = Object.keys(criteria);
           const [ value ] = Object.values(criteria);
@@ -76,19 +86,9 @@ export const Bucket = (params) => {
           throw new Error('Not enough records to offset.');
         }
       }
-      const expandedList = (slicedList || filteredList).map(item => {
-        _expansions.every(expansion => {
-          const toReplace = item[Object.keys(expansion)[0]];
-          item[Object.keys(expansion)[0]] = async () => {
-            const [ collection, propName ] = Object.values(expansion)[0].split('/');
-            return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
-          }
-        });
-        return item;
-      });
-      return _cacheAdapter.populate({ collection: _collection, data: expandedList });
+      return (slicedList || filteredList);
     }
-    return _cacheAdapter.get();
+    return _cacheAdapter.get({ collection: _collection, filters: _filters, order: _order, limit, offset });
   }
   const _fetchSingle = async() => {
     let data = await _source.get({ filename: _single });

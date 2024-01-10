@@ -19,6 +19,7 @@ export const FileSystem = ({ bucketPath }) => {
           }
           return {
             id: filename,
+            slug: filename,
             ..._extractFrontMatter(file),
             ...(omitBody === false ? _extractBody(file) : { body: null }),
           }
@@ -39,6 +40,7 @@ export const FileSystem = ({ bucketPath }) => {
       file = await open({ filename: path.join('singles', [filename, _defaultFileExtension].join('.')) });
       return {
         id: filename,
+        slug: filename,
         ..._extractFrontMatter(file),
         ..._extractBody(file),
       }
