@@ -24,7 +24,7 @@ export const Cache = () => {
     return data;
   }
   const get = ({ collection, filters, order, limit = -1, offset = 0 }) => {
-    // TODO: on first search (when gathered from MD files) null values are displayed, even though they're filtered
+    // TODO: on first search (when gathered from MD files) "null" values are displayed, even though they're filtered
     // TODO: Bool filtering doesn't work because of quotes.
     // TODO: Date's in WHERE's
     // TODO: Should optimize queries, merge into single query.
