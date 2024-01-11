@@ -52,8 +52,8 @@ export const Bucket = ({ cache: _cacheAdapter }) => {
     throw new Error('Select failed.');
   }
   const _fetchCollection = async(params = {}) => {
-    const { limit, offset } = params;
-    if(!_cacheAdapter.isCached({ entityType: _collection })) {
+    const { limit, offset = 0 } = params;
+    if(!_cacheAdapter.isCached({ entityType: _collection }) || limit === 1) {
       const list = await _source.list({ collection: _collection, omitBody: !(limit === 1)  });
       if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
       const expandedList = list.map(item => {
@@ -78,7 +78,7 @@ export const Bucket = ({ cache: _cacheAdapter }) => {
         _order.every(([field, criteria]) => filteredList.sort((a,b) => Sort[criteria](a[field], b[field])));
       }
       let slicedList;
-      if(limit !== undefined && offset !== undefined) {
+      if(limit !== undefined) {
         if(filteredList.length >= (offset + limit)) {
           slicedList = filteredList.slice(offset, offset + limit);
         }

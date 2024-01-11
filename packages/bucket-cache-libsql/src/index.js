@@ -24,9 +24,11 @@ export const Cache = () => {
     return data;
   }
   const get = ({ collection, filters, order, limit = -1, offset = 0 }) => {
+    // TODO: Returns body even if limit > 1
     // TODO: on first search (when gathered from MD files) "null" values are displayed, even though they're filtered
     // TODO: Bool filtering doesn't work because of quotes.
-    // TODO: Date's in WHERE's
+    // TODO: Quotes in WHEREs break the query.
+    // TODO: Dates in WHEREs don't work properly
     // TODO: Should optimize queries, merge into single query.
     // TODO: How to run the complex sort's? -- dates.
     let list = [];
