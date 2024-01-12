@@ -5,8 +5,9 @@ import { FileSystem } from '@crux/bucket-source-filesystem';
 import { Resolvers } from '@crux/graphql-api-resolvers';
 import { transform } from '@crux/graphql-api';
 
-const bucket = Bucket({ cache: BucketCache() }).load({
+const bucket = Bucket().load({
   source: FileSystem({ bucketPath: '../../samples/bucket' }),
+  cache: BucketCache(),
 });
 
 const manifest = await bucket.manifest();

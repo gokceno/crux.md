@@ -1,7 +1,7 @@
 import Database from 'libsql';
 
 export const Cache = () => {
-  const db = new Database('./db.sqlite');
+  const db = new Database(':memory:');
   const _createCacheTables = () => {
     db.exec(`CREATE TABLE collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, collection_body TEXT)`);
     db.exec(`CREATE TABLE collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON)`);

@@ -3,7 +3,8 @@ import * as Comparison from '@crux/comparison';
 import * as Sort from '@crux/sort';
 import { typof } from '@crux/typof';
 
-export const Bucket = ({ cache: _cacheAdapter }) => {
+export const Bucket = () => {
+  let _cache;
   let _source = {};
   let _collection;
   let _single;
@@ -40,10 +41,10 @@ export const Bucket = ({ cache: _cacheAdapter }) => {
     }
     return this;
   }
-  function load({ source }) {
-    // TODO: Check if directories are readable
-    if(source == undefined) throw new Error('Source is not defined');
+  function load({ source, cache }) {
+    if(source == undefined) throw new Error('Source is not defined'); // TODO: Check if directories are readable
     _source = source;
+    _cache = cache;
     return this;
   }
   const fetch = async (params) => {
@@ -53,7 +54,7 @@ export const Bucket = ({ cache: _cacheAdapter }) => {
   }
   const _fetchCollection = async(params = {}) => {
     const { limit, offset = 0 } = params;
-    if(!_cacheAdapter.isCached({ entityType: _collection }) || limit === 1) {
+    if(!_cache.isCached({ entityType: _collection }) || limit === 1) {
       const list = await _source.list({ collection: _collection, omitBody: !(limit === 1)  });
       if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
       const expandedList = list.map(item => {
@@ -66,7 +67,7 @@ export const Bucket = ({ cache: _cacheAdapter }) => {
         });
         return item;
       });
-      _cacheAdapter.populate({ collection: _collection, data: expandedList });
+      _cache.populate({ collection: _collection, data: expandedList });
       const filteredList = expandedList.filter(item => {
         return _filters.every(([field, criteria]) => {
           const [ condition ] = Object.keys(criteria);
@@ -88,7 +89,7 @@ export const Bucket = ({ cache: _cacheAdapter }) => {
       }
       return (slicedList || filteredList);
     }
-    return _cacheAdapter.get({ collection: _collection, filters: _filters, order: _order, limit, offset });
+    return _cache.get({ collection: _collection, filters: _filters, order: _order, limit, offset });
   }
   const _fetchSingle = async() => {
     let data = await _source.get({ filename: _single });
