@@ -1,14 +1,13 @@
 import Database from 'libsql';
 
-export const Cache = () => {
-  const db = new Database(':memory:');
+export const Cache = ({ dbPath = ':memory:' }) => {
+  const db = new Database(dbPath);
   const _createCacheTables = () => {
     db.exec(`CREATE TABLE collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, collection_body TEXT)`);
     db.exec(`CREATE TABLE collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON)`);
   }
-  const _flush = () => {
-    return ['collections', 'collections_props'].map(collection => db.exec(`DELETE FROM ${collection}`));
-  }
+  const _flush = () => ['collections', 'collections_props'].map(collection => db.exec(`DELETE FROM ${collection}`));
+  const _reset = () => ['collections', 'collections_props'].map(collection => db.exec(`DROP TABLE IF EXISTS ${collection}`));
   const populate = ({ collection, single, data }) => {
     _flush();
     data.map(async item => {
@@ -38,12 +37,12 @@ export const Cache = () => {
     const collections = db
       .prepare(`
         SELECT
-            c.id AS collection_id, 
-            GROUP_CONCAT('"' || cp.prop_name || '":' || cp.prop_value) AS properties
+          c.id AS collection_id, 
+          GROUP_CONCAT('"' || cp.prop_name || '":' || cp.prop_value) AS properties
         FROM collections c
         LEFT JOIN collections_props cp ON c.id = cp.collection_id
         GROUP BY
-            c.id
+          c.id
         HAVING 
           ${filters.filter(f => Object.keys(f)[0] !== '_eq' && f[1]._eq !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') = '${f[1]._eq}' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
           ${filters.filter(f => Object.keys(f)[0] !== '_neq' && f[1]._neq !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') != '${f[1]._neq}' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
@@ -67,6 +66,7 @@ export const Cache = () => {
     const numOfRows = db.prepare(`SELECT COUNT(1) as count FROM collections WHERE collection_type = ?`).get(entityType);
     return numOfRows?.count !== 0;
   }
+  if(dbPath !== ':memory:') _reset();
   _createCacheTables();
   return {
     populate,
