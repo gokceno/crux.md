@@ -26,14 +26,15 @@ const pinoHttpLogger = pinoHttp(loggerOptions);
 // Set up buckets
 const bucket = Bucket().load({
   source: FileSystem({ bucketPath: '../../samples/bucket' }),
-  cache: BucketCache({
-    dbPath: ':memory:',
-    expires: '1 second',
-  }),
 });
 
 const manifest = await bucket.manifest();
 
+bucket.initCache(BucketCache({
+  dbPath: ':memory:',
+  expires: '1 second',
+  manifest,
+}));
 
 app.use(pinoHttpLogger);
 app.use(bodyParser.json());

@@ -47,6 +47,11 @@ export const Bucket = () => {
     _cache = cache;
     return this;
   }
+  function initCache(cache) {
+    if(cache == undefined) throw new Error('Cache adapter is not defined');
+    _cache = cache;
+    return this;
+  }
   const fetch = async (params) => {
     if(_collection !== undefined) return _fetchCollection(params);
     if(_single !== undefined) return _fetchSingle();
@@ -112,5 +117,6 @@ export const Bucket = () => {
     load,
     expand,
     fetch,
+    initCache,
   }
 }

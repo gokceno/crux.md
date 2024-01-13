@@ -1,6 +1,6 @@
 import Database from 'libsql';
 
-export const Cache = ({ dbPath = ':memory:' }) => {
+export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
   const db = new Database(dbPath);
   const _createCacheTables = () => {
     db.exec(`CREATE TABLE collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, collection_body TEXT)`);
