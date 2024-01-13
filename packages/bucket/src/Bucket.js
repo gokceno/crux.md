@@ -60,7 +60,7 @@ export const Bucket = () => {
   const _fetchCollection = async(params = {}) => {
     const { limit, offset = 0 } = params;
     if(!_cache.isCached({ entityType: _collection }) || limit === 1) {
-      const list = await _source.list({ collection: _collection, omitBody: !(limit === 1)  });
+      const list = await _source.list({ collection: _collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
       if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
       const expandedList = list.map(item => {
         _expansions.every(expansion => {
