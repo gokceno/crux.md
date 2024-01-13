@@ -1,9 +1,9 @@
 {
   "name": "@crux/graphql-api",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "./src/index.js",
   "type": "module",
   "dependencies": {
-    "@crux/graphql-api-resolvers": "0.0.0"
+    "@crux/graphql-api-resolvers": "0.0.1"
   }
 }

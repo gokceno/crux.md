@@ -1,10 +1,10 @@
 {
   "name": "@crux/bucket",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "./src/Bucket.js",
   "type": "module",
   "dependencies": {
-    "@crux/sort": "0.0.0",
-    "@crux/typof": "0.0.0"
+    "@crux/sort": "0.0.1",
+    "@crux/typof": "0.0.1"
   }
 }

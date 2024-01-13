@@ -1,6 +1,6 @@
 {
   "name": "@crux/bucket-source-filesystem",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "./src/Filesystem.js",
   "type": "module",
   "dependencies": {
