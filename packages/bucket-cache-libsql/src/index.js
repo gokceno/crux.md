@@ -29,10 +29,6 @@ export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
     // TODO: Must expire cache automatically
     // TODO: Returns body even if limit > 1
     // TODO: on first search (when gathered from MD files) "null" values are displayed, even though they're filtered
-    // TODO: Bool filtering doesn't work because of quotes.
-    // TODO: Quotes in WHEREs break the query.
-    // TODO: Dates in WHEREs don't work properly
-    // TODO: How to run the complex sort's? -- dates.
     let list = [];
     const collections = db
       .prepare(`
@@ -44,14 +40,7 @@ export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
         GROUP BY
           c.id
         HAVING 
-          ${filters.filter(f => Object.keys(f)[0] !== '_eq' && f[1]._eq !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') = '${f[1]._eq}' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
-          ${filters.filter(f => Object.keys(f)[0] !== '_neq' && f[1]._neq !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') != '${f[1]._neq}' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
-          ${filters.filter(f => Object.keys(f)[0] !== '_null' && f[1]._null !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') = '' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
-          ${filters.filter(f => Object.keys(f)[0] !== '_nnull' && f[1]._nnull !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') != '' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
-          ${filters.filter(f => Object.keys(f)[0] !== '_gt' && f[1]._gt !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') > '${f[1]._gt}' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
-          ${filters.filter(f => Object.keys(f)[0] !== '_gte' && f[1]._gte !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') >= '${f[1]._gte}' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
-          ${filters.filter(f => Object.keys(f)[0] !== '_lt' && f[1]._lt !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') < '${f[1]._lt}' THEN 1 ELSE 0 END) = 1 AND') OR`).join(' ')}
-          ${filters.filter(f => Object.keys(f)[0] !== '_lte' && f[1]._lte !== undefined).map(f => `MAX(CASE WHEN cp.prop_name = '${f[0]}' AND JSON_EXTRACT(cp.prop_value, '$') <= '${f[1]._lte}' THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
+          ${filters.map(([propName, propComparison]) => `MAX(CASE WHEN cp.prop_name = '${propName}' AND ${_constructWhere({ collection, propName, propComparison })} THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
           c.collection_type = ?
         ORDER BY
           ${order.map(o => `MAX(CASE WHEN cp.prop_name = '${o[0]}' THEN cp.prop_value ELSE NULL END) ${o[1]},`).join(' ')}
@@ -61,6 +50,46 @@ export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
       .all([collection, limit, offset]);
       collections.map(collection => list.push(JSON.parse(`{${collection.properties}}`)));
       return list;
+  }
+  const _constructWhere = ({ collection, propName, propComparison }) => {
+    let statement = [];
+    const compareBy = Object.keys(propComparison)[0];
+    const compareWith = Object.values(propComparison)[0];
+    const manifestDataType = manifest?.collections?.filter(f => Object.keys(f)[0] === collection)[0][collection]?.filter(f => Object.keys(f)[0] === propName)[0][propName];
+    
+    if(compareBy === '_eq') {
+      if (['string', 'date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') = '${compareWith.replaceAll("'", "''")}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') = ${compareWith}`);
+      if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS ${compareWith}`);
+    }
+    if(compareBy === '_neq') {
+      if (['string', 'date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') != '${compareWith.replaceAll("'", "''")}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') != ${compareWith}`);
+      if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS NOT ${compareWith}`);
+    }
+    if(compareBy === '_null') {
+      statement.push(`COALESCE(JSON_EXTRACT(cp.prop_value, '$'), '') = ''`);
+    }
+    if(compareBy === '_nnull') {
+      statement.push(`COALESCE(JSON_EXTRACT(cp.prop_value, '$'), '') != ''`);
+    }
+    if(compareBy === '_gt') {
+      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') > '${compareWith}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') > ${compareWith}`);
+    }
+    if(compareBy === '_gte') {
+      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') >= '${compareWith}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') >= ${compareWith}`);
+    }
+    if(compareBy === '_lt') {
+      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') < '${compareWith}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') < ${compareWith}`);
+    }
+    if(compareBy === '_lte') {
+      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') <= '${compareWith}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') <= ${compareWith}`);
+    }
+    return statement.join(' AND ');
   }
   const isCached = ({ entityType }) => {
     const numOfRows = db.prepare(`SELECT COUNT(1) as count FROM collections WHERE collection_type = ?`).get(entityType);
