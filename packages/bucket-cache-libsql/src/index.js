@@ -1,9 +1,9 @@
 import Database from 'libsql';
 
-export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
+export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }) => {
   const db = new Database(dbPath);
   const _createCacheTables = () => {
-    db.exec(`CREATE TABLE collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, collection_body TEXT)`);
+    db.exec(`CREATE TABLE collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, _cached_at TEXT)`);
     db.exec(`CREATE TABLE collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON)`);
   }
   const _flush = () => ['collections', 'collections_props'].map(collection => db.exec(`DELETE FROM ${collection}`));
@@ -11,7 +11,7 @@ export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
   const populate = ({ collection, single, data }) => {
     _flush();
     data.map(async item => {
-      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id) VALUES (?, ?)`).run([collection,item.id]);
+      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, _cached_at) VALUES (?, ?, DATETIME())`).run([collection,item.id]);
       const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
       Object.keys(item)
         .map(async (prop) => {
@@ -26,7 +26,6 @@ export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
     return data;
   }
   const get = ({ collection, filters, order, limit = -1, offset = 0 }) => {
-    // TODO: Must expire cache automatically
     // TODO: Returns body even if limit > 1
     // TODO: on first search (when gathered from MD files) "null" values are displayed, even though they're filtered
     let list = [];
@@ -37,6 +36,7 @@ export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
           GROUP_CONCAT('"' || cp.prop_name || '":' || cp.prop_value) AS properties
         FROM collections c
         LEFT JOIN collections_props cp ON c.id = cp.collection_id
+        WHERE DATETIME(c._cached_at, '+${expires}') >= DATETIME()
         GROUP BY
           c.id
         HAVING 
@@ -91,12 +91,12 @@ export const Cache = ({ dbPath = ':memory:', expires, manifest }) => {
     }
     return statement.join(' AND ');
   }
-  const isCached = ({ entityType }) => {
-    const numOfRows = db.prepare(`SELECT COUNT(1) as count FROM collections WHERE collection_type = ?`).get(entityType);
-    return numOfRows?.count !== 0;
-  }
+  const isCached = ({ entityType }) => !!db.prepare(`SELECT COUNT(1) as count FROM collections c WHERE DATETIME(c._cached_at, '+${expires}') >= DATETIME() AND c.collection_type = ?`).get(entityType)?.count;
+  
+  // Init
   if(dbPath !== ':memory:') _reset();
   _createCacheTables();
+
   return {
     populate,
     get,

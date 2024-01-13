@@ -32,7 +32,7 @@ const manifest = await bucket.manifest();
 
 bucket.initCache(BucketCache({
   dbPath: ':memory:',
-  expires: '1 second',
+  expires: '10 SECONDS',
   manifest,
 }));
 
