@@ -28,6 +28,6 @@
     "@gokceno/crux-bucket": "0.0.1",
     "@gokceno/crux-bucket-cache-libsql": "0.0.2",
     "@gokceno/crux-bucket-source-filesystem": "0.0.1",
-    "@gokceno/crux-bucket-source-github": "0.0.1"
+    "@gokceno/crux-bucket-source-github": "0.0.2"
   }
 }
