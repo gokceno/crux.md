@@ -1,4 +1,4 @@
-# @crux/typof
+# @gokceno/crux-typof
 
 ## 0.0.1
 

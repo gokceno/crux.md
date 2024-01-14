@@ -3,10 +3,10 @@ import bodyParser from 'body-parser';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { createHandler } from 'graphql-http/lib/use/express';
-import { schema } from '@crux/graphql-schema';
-import { Bucket } from '@crux/bucket';
-import { Cache as BucketCache } from '@crux/bucket-cache-libsql';
-import { FileSystem } from '@crux/bucket-source-filesystem';
+import { schema } from '@gokceno/crux-graphql-schema';
+import { Bucket } from '@gokceno/crux-bucket';
+import { Cache as BucketCache } from '@gokceno/crux-bucket-cache-libsql';
+import { FileSystem } from '@gokceno/crux-bucket-source-filesystem';
 
 const app = express();
 

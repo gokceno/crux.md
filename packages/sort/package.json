@@ -1,5 +1,5 @@
 {
-  "name": "@crux/sort",
+  "name": "@gokceno/crux-sort",
   "repository": "git+https://github.com/gokceno/crux.md.git",
   "version": "0.0.1",
   "main": "./src/index.js",
@@ -8,7 +8,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@crux/typof": "0.0.1",
+    "@gokceno/crux-typof": "0.0.1",
     "luxon": "^3.4.0"
   }
 }

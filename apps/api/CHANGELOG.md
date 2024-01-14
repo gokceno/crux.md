@@ -10,7 +10,7 @@
 
 - Init Changesets
 - Updated dependencies
-  - @crux/bucket@0.0.1
-  - @crux/bucket-cache-libsql@0.0.1
-  - @crux/bucket-source-filesystem@0.0.1
-  - @crux/graphql-schema@0.0.1
+  - @gokceno/crux-bucket@0.0.1
+  - @gokceno/crux-bucket-cache-libsql@0.0.1
+  - @gokceno/crux-bucket-source-filesystem@0.0.1
+  - @gokceno/crux-graphql-schema@0.0.1

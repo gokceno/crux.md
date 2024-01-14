@@ -1,4 +1,4 @@
-# @crux/bucket
+# @gokceno/crux-bucket
 
 ## 0.0.1
 
@@ -6,5 +6,5 @@
 
 - Init Changesets
 - Updated dependencies
-  - @crux/sort@0.0.1
-  - @crux/typof@0.0.1
+  - @gokceno/crux-sort@0.0.1
+  - @gokceno/crux-typof@0.0.1

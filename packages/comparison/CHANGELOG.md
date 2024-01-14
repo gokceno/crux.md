@@ -1,4 +1,4 @@
-# @crux/comparison
+# @gokceno/crux-comparison
 
 ## 0.0.1
 

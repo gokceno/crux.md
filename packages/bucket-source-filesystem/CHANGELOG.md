@@ -1,4 +1,4 @@
-# @crux/bucket-source-filesystem
+# @gokceno/crux-bucket-source-filesystem
 
 ## 0.0.1
 

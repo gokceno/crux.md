@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { typof } from '@crux/typof';
+import { typof } from '@gokceno/crux-typof';
 
 export const asc = (a, b) => {
 	if(a == b) return 0;

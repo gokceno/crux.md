@@ -1,5 +1,5 @@
 {
-  "name": "@crux/typof",
+  "name": "@gokceno/crux-typof",
   "repository": "git+https://github.com/gokceno/crux.md.git",
   "version": "0.0.1",
   "main": "./src/index.js",

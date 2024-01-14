@@ -1,6 +1,6 @@
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
-import { Resolvers } from '@crux/graphql-api-resolvers';
-import { transform } from '@crux/graphql-api';
+import { Resolvers } from '@gokceno/crux-graphql-api-resolvers';
+import { transform } from '@gokceno/crux-graphql-api';
 
 
 const schema = ({ bucket, manifest }) => new GraphQLSchema({

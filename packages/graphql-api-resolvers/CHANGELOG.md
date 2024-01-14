@@ -1,4 +1,4 @@
-# @crux/graphql-api-resolvers
+# @gokceno/crux-graphql-api-resolvers
 
 ## 0.0.1
 

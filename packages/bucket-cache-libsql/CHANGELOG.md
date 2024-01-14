@@ -1,4 +1,4 @@
-# @crux/bucket-cache-libsql
+# @gokceno/crux-bucket-cache-libsql
 
 ## 0.0.1
 

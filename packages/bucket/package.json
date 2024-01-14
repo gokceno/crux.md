@@ -1,5 +1,5 @@
 {
-  "name": "@crux/bucket",
+  "name": "@gokceno/crux-bucket",
   "repository": "git+https://github.com/gokceno/crux.md.git",
   "version": "0.0.1",
   "main": "./src/Bucket.js",
@@ -8,7 +8,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@crux/sort": "0.0.1",
-    "@crux/typof": "0.0.1"
+    "@gokceno/crux-sort": "0.0.1",
+    "@gokceno/crux-typof": "0.0.1"
   }
 }

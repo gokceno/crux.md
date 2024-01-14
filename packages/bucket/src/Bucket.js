@@ -1,7 +1,7 @@
 import YAML from 'yaml';
-import * as Comparison from '@crux/comparison';
-import * as Sort from '@crux/sort';
-import { typof } from '@crux/typof';
+import * as Comparison from '@gokceno/crux-comparison';
+import * as Sort from '@gokceno/crux-sort';
+import { typof } from '@gokceno/crux-typof';
 
 export const Bucket = () => {
   let _cache;

@@ -1,5 +1,5 @@
 {
-  "name": "@crux/graphql-api-resolvers",
+  "name": "@gokceno/crux-graphql-api-resolvers",
   "repository": "git+https://github.com/gokceno/crux.md.git",
   "version": "0.0.1",
   "main": "./src/Resolvers.js",
