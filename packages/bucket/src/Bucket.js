@@ -57,6 +57,14 @@ export const Bucket = () => {
     if(_single !== undefined) return _fetchSingle();
     throw new Error('Select failed.');
   }
+  const manifest = async() => {
+    // TODO: handle parse errors
+    if(_cache === undefined) return YAML.parse(await _source.open({ filename: 'manifest.yml' }));
+    if(!_cache.isCached({ isManifest: true })) {
+      return _cache.populate({ isManifest: true, data: YAML.parse(await _source.open({ filename: 'manifest.yml' }))});
+    }
+    return _cache.get({ isManifest: true });
+  }
   const _fetchCollection = async(params = {}) => {
     const { limit, offset = 0 } = params;
     if(!_cache.isCached({ entityType: _collection }) || limit === 1) {
@@ -107,8 +115,6 @@ export const Bucket = () => {
     });
     return data;
   }
-  //TODO: handle parse errors
-  const manifest = async() => YAML.parse(await _source.open({ filename: 'manifest.yml' }))
   return {
     manifest,
     select,

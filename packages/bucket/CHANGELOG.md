@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 0.1.0
+
+### Minor Changes
+
+- Added ability to cache manifests
+
 ## 0.0.1
 
 ### Patch Changes
