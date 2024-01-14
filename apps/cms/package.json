@@ -1,5 +1,6 @@
 {
   "name": "cms",
+  "repository": "https://github.com/gokceno/crux.md",
   "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",

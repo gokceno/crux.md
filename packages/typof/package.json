@@ -1,5 +1,6 @@
 {
   "name": "@crux/typof",
+  "repository": "https://github.com/gokceno/crux.md",
   "version": "0.0.1",
   "main": "./src/index.js",
   "type": "module"

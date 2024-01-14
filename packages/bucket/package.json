@@ -1,5 +1,6 @@
 {
   "name": "@crux/bucket",
+  "repository": "https://github.com/gokceno/crux.md",
   "version": "0.0.1",
   "main": "./src/Bucket.js",
   "type": "module",
