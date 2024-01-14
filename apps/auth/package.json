@@ -1,7 +1,7 @@
 {
   "name": "crux-cms-auth",
   "private": true,
-  "repository": "https://github.com/gokceno/crux.md",
+  "repository": "git+https://github.com/gokceno/crux.md.git",
   "version": "1.1.1",
   "engines": {
     "node": ">=7.x"

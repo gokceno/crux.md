@@ -1,7 +1,7 @@
 {
   "name": "crux-cms",
   "private": true,
-  "repository": "https://github.com/gokceno/crux.md",
+  "repository": "git+https://github.com/gokceno/crux.md.git",
   "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",

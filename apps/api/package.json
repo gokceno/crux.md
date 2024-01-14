@@ -1,6 +1,6 @@
 {
   "name": "crux-api",
-  "repository": "https://github.com/gokceno/crux.md",
+  "repository": "git+https://github.com/gokceno/crux.md.git",
   "private": true,
   "version": "0.2.0",
   "license": "UNLICENSED",
