@@ -4,6 +4,9 @@
   "version": "0.0.1",
   "main": "./src/Bucket.js",
   "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {
     "@crux/sort": "0.0.1",
     "@crux/typof": "0.0.1"

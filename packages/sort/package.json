@@ -4,6 +4,9 @@
   "version": "0.0.1",
   "main": "./src/index.js",
   "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {
     "@crux/typof": "0.0.1",
     "luxon": "^3.4.0"

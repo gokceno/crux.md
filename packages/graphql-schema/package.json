@@ -4,6 +4,9 @@
   "version": "0.0.1",
   "main": "./src/index.js",
   "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {
     "@crux/graphql-api": "0.0.1",
     "@crux/graphql-api-resolvers": "0.0.1",
