@@ -43,7 +43,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
           ${filters.map(([propName, propComparison]) => `MAX(CASE WHEN cp.prop_name = '${propName}' AND ${_constructWhere({ collection, propName, propComparison })} THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
           c.collection_type = ?
         ORDER BY
-          ${order.map(o => `MAX(CASE WHEN cp.prop_name = '${o[0]}' THEN cp.prop_value ELSE NULL END) ${o[1]},`).join(' ')}
+          ${order.map(o => `MAX(CASE WHEN cp.prop_name = '${o[0]}' THEN cp.prop_value ELSE NULL END) COLLATE NOCASE ${o[1]},`).join(' ')}
           MAX(cp.prop_value) ASC
         LIMIT ? OFFSET ?
       `)
@@ -52,47 +52,59 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
       return list;
   }
   const _constructWhere = ({ collection, propName, propComparison }) => {
-    let statement = [];
     const compareBy = Object.keys(propComparison)[0];
     const compareWith = Object.values(propComparison)[0];
     const manifestDataType = manifest?.collections?.filter(f => Object.keys(f)[0] === collection)[0][collection]?.filter(f => Object.keys(f)[0] === propName)[0][propName];
-    
-    if(compareBy === '_eq') {
-      if (['string', 'date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') = '${compareWith.replaceAll("'", "''")}'`);
-      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') = ${compareWith}`);
-      if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS ${compareWith}`);
-    }
-    if(compareBy === '_neq') {
-      if (['string', 'date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') != '${compareWith.replaceAll("'", "''")}'`);
-      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') != ${compareWith}`);
-      if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS NOT ${compareWith}`);
-    }
-    if(compareBy === '_null') {
-      statement.push(`COALESCE(JSON_EXTRACT(cp.prop_value, '$'), '') = ''`);
-    }
-    if(compareBy === '_nnull') {
-      statement.push(`COALESCE(JSON_EXTRACT(cp.prop_value, '$'), '') != ''`);
-    }
-    if(compareBy === '_gt') {
-      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') > '${compareWith}'`);
-      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') > ${compareWith}`);
-    }
-    if(compareBy === '_gte') {
-      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') >= '${compareWith}'`);
-      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') >= ${compareWith}`);
-    }
-    if(compareBy === '_lt') {
-      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') < '${compareWith}'`);
-      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') < ${compareWith}`);
-    }
-    if(compareBy === '_lte') {
-      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') <= '${compareWith}'`);
-      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') <= ${compareWith}`);
-    }
+    let statement = [];
+    statement.push(
+      ..._whereComponents[compareBy](manifestDataType, compareWith)
+    );
     return statement.join(' AND ');
   }
   const isCached = ({ entityType }) => !!db.prepare(`SELECT COUNT(1) as count FROM collections c WHERE DATETIME(c._cached_at, '+${expires}') >= DATETIME() AND c.collection_type = ?`).get(entityType)?.count;
-  
+  const _whereComponents = {
+    _eq: (manifestDataType, compareWith) => {
+      let statement = [];
+      if (['string', 'date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') = '${compareWith.replaceAll("'", "''")}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') = ${compareWith}`);
+      if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS ${compareWith}`);
+      return statement;
+    },
+    _neq: (manifestDataType, compareWith) => {
+      if (['string', 'date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') != '${compareWith.replaceAll("'", "''")}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') != ${compareWith}`);
+      if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS NOT ${compareWith}`);
+      return statement;
+    },
+    _null: (manifestDataType, compareWith) => {
+      statement.push(`COALESCE(JSON_EXTRACT(cp.prop_value, '$'), '') = ''`);
+      return statement;
+    },
+    _nnull: (manifestDataType, compareWith) => {
+      statement.push(`COALESCE(JSON_EXTRACT(cp.prop_value, '$'), '') != ''`);
+      return statement;
+    },
+    _lt: (manifestDataType, compareWith) => {
+      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') < '${compareWith}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') < ${compareWith}`);
+      return statement;
+    },
+    _gt: (manifestDataType, compareWith) => {
+      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') > '${compareWith}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') > ${compareWith}`);
+      return statement;
+    },
+    _lte: (manifestDataType, compareWith) => {
+      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') <= '${compareWith}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') <= ${compareWith}`);
+      return statement;
+    },
+    _gte: (manifestDataType, compareWith) => {
+      if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') >= '${compareWith}'`);
+      if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') >= ${compareWith}`);
+      return statement;
+    }
+  };
   // Init
   if(dbPath !== ':memory:') _reset();
   _createCacheTables();
