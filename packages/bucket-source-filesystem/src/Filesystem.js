@@ -18,10 +18,11 @@ export const FileSystem = ({ bucketPath }) => {
             throw new Error('Failed to get file contents or types got mixed up.');
           }
           return {
-            id: filename,
-            slug: filename,
+            _id: filename,
+            _slug: filename,
+            _filename: filename,
             ..._extractFrontMatter(file),
-            ...(omitBody === false ? _extractBody(file) : { body: null }),
+            ...(omitBody === false ? _extractBody(file) : { _body: null }),
           }
         } catch (e) {
           console.error(e);
@@ -39,8 +40,9 @@ export const FileSystem = ({ bucketPath }) => {
       let file;
       file = await open({ filename: path.join('singles', [filename, _defaultFileExtension].join('.')) });
       return {
-        id: filename,
-        slug: filename,
+        _id: filename,
+        _slug: filename,
+        _filename: filename,
         ..._extractFrontMatter(file),
         ..._extractBody(file),
       }
@@ -50,7 +52,7 @@ export const FileSystem = ({ bucketPath }) => {
     }
   }
   const _extractBody = (file) => {
-    return { body: file.split('---')[2] || null };
+    return { _body: file.split('---')[2] || null };
   }
   const _extractFrontMatter = (file) => {
     // via and thanks to: https://github.com/jxson/front-matter/blob/master/index.js

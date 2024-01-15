@@ -29,13 +29,15 @@ const pinoHttpLogger = pinoHttp(loggerOptions);
 
 // Set up buckets
 const bucket = Bucket().load({
-  // source: FileSystem({ bucketPath: '../../samples/bucket' }),
+  source: FileSystem({ bucketPath: '../../../koc-system-website/apps/api/.bucket' }),
+  /*
   source: GitHub({
     owner: 'gokceno',
     repo: 'crux.md',
     basePath: 'samples/bucket',
     auth: process.env.GITHUB_TOKEN,
   })
+  */
 });
 
 const manifest = await bucket.manifest();

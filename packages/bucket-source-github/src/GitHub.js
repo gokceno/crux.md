@@ -25,8 +25,9 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     const promises = response?.data?.filter(d => d.name.split('.')[1] === _defaultFileExtension).map(async (file) => {
       const fileContents = await open({ filename: path.join('collections', collection, file.name) });
       return {
-        id: file.name,
-        slug: file.name,
+        _id: file.name,
+        _slug: file.name,
+        _filename: file.name,
         ..._extractFrontMatter(fileContents),
         ...(omitBody === false ? _extractBody(fileContents) : { body: null }),
       }
@@ -36,8 +37,9 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
   const get = async({ filename }) => {
     const fileContents = await open({ filename: path.join('singles', [filename, _defaultFileExtension].join('.')) });
     return {
-      id: filename,
-      slug: filename,
+      _id: filename,
+      _slug: filename,
+      _filename: filename,
       ..._extractFrontMatter(fileContents),
       ..._extractBody(fileContents),
     }

@@ -78,7 +78,7 @@ const mapGraphQLTypes = (type, leaf) => {
 }
 const mapFields = (node, nodes, depth = 0) => {
   let leafObj = {};
-  Object.values(node)[0].push({ body: 'string' });
+  Object.values(node)[0].push({ _body: 'string' });
   Object.values(node)[0].map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
       if(type.includes('/')) {
