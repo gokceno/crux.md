@@ -55,7 +55,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
   const _cacheCollection = ({ collection, data }) => {
     _flush();
     data.map(async item => {
-      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, _cached_at) VALUES (?, ?, DATETIME())`).run([collection,item.id]);
+      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, _cached_at) VALUES (?, ?, DATETIME())`).run([collection,item._id]);
       const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
       Object.keys(item)
         .map(async (prop) => {
