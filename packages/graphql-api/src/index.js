@@ -82,7 +82,7 @@ const mapFields = (node, nodes, depth = 0) => {
   Object.values(node)[0].map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
       if(type.includes('/')) {
-        if(depth < 1) {
+        if(depth < 1 && nodes !== undefined) {
           const [targetNodeName, targetNodeVia] = type.split('/');
           const targetNode = nodes.filter(leaf => Object.keys(leaf)[0] == targetNodeName);
           leafObj[name] = {
