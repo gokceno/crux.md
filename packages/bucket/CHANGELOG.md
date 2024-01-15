@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 0.1.1
+
+### Patch Changes
+
+- Added missing dependency
+
 ## 0.1.0
 
 ### Minor Changes
