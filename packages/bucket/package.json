@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@gokceno/crux-sort": "0.0.1",
-    "@gokceno/crux-typof": "0.0.1"
+    "@gokceno/crux-typof": "0.0.1",
+    "@gokceno/crux-comparison": "0.0.1"
   }
 }
