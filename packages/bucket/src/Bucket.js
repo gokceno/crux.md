@@ -110,7 +110,6 @@ export const Bucket = () => {
       const toReplace = await data[Object.keys(expansion)[0]];
       data[Object.keys(expansion)[0]] = async () => {
         const [ collection, propName ] = Object.values(expansion)[0].split('/');
-        console.log(toReplace);
         return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
       }
     });
