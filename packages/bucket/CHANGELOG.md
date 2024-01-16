@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 0.1.2
+
+### Patch Changes
+
+- Fixed expansions not working consistently.
+
 ## 0.1.1
 
 ### Patch Changes
