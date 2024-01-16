@@ -71,7 +71,7 @@ export const Bucket = () => {
       const list = await _source.list({ collection: _collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
       if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
       const expandedList = list.map(item => {
-        _expansions.every(async (expansion) => {
+        _expansions.map(async (expansion) => {
           const toReplace = await item[Object.keys(expansion)[0]];
           item[Object.keys(expansion)[0]] = async () => {
             const [ collection, propName ] = Object.values(expansion)[0].split('/');
