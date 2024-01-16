@@ -10,6 +10,6 @@
   "dependencies": {
     "@gokceno/crux-graphql-api": "0.0.2",
     "@gokceno/crux-graphql-api-resolvers": "0.0.1",
-    "graphql": "^16.7.1"
+    "graphql": "^16.8.1"
   }
 }
