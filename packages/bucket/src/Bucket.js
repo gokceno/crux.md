@@ -67,7 +67,7 @@ export const Bucket = () => {
   }
   const _fetchCollection = async(params = {}) => {
     const { limit, offset = 0 } = params;
-    if(!_cache.isCached({ entityType: _collection }) || limit === 1) {
+    if(!_cache.isCached({ collection: _collection }) || limit === 1) {
       const list = await _source.list({ collection: _collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
       if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
       const expandedList = await list.map(item => {
@@ -105,15 +105,18 @@ export const Bucket = () => {
     return _cache.get({ collection: _collection, filters: _filters, order: _order, limit, offset });
   }
   const _fetchSingle = async() => {
-    let data = await _source.get({ filename: _single });
-    _expansions.map(async (expansion) => {
-      const toReplace = await data[Object.keys(expansion)[0]];
-      data[Object.keys(expansion)[0]] = async () => {
-        const [ collection, propName ] = Object.values(expansion)[0].split('/');
-        return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
-      }
-    });
-    return data;
+    if(!_cache.isCached({ single: _single })) {
+      let data = await _source.get({ filename: _single });
+      await _expansions.map(async (expansion) => {
+        const toReplace = await data[Object.keys(expansion)[0]];
+        data[Object.keys(expansion)[0]] = async () => {
+          const [ collection, propName ] = Object.values(expansion)[0].split('/');
+          return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
+        }
+      });
+      return _cache.populate({ single: _single, data });
+    }
+    return _cache.get({ single: _single });
   }
   return {
     manifest,
