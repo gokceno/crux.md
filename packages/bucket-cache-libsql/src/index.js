@@ -21,11 +21,11 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     return false;
   }
   const _createCacheTables = () => {
-    db.exec(`CREATE TABLE singles (id INTEGER PRIMARY KEY, single_type TEXT, _cached_at TEXT)`);
-    db.exec(`CREATE TABLE singles_props (id INTEGER PRIMARY KEY, single_id INTEGER, prop_name TEXT, prop_value JSON)`);
-    db.exec(`CREATE TABLE collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, _cached_at TEXT)`);
-    db.exec(`CREATE TABLE collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON)`);
-    db.exec(`CREATE TABLE manifest (id INTEGER PRIMARY KEY, body JSON, _cached_at TEXT)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS singles (id INTEGER PRIMARY KEY, single_type TEXT, _cached_at TEXT)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS singles_props (id INTEGER PRIMARY KEY, single_id INTEGER, prop_name TEXT, prop_value JSON)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, _cached_at TEXT)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS manifest (id INTEGER PRIMARY KEY, body JSON, _cached_at TEXT)`);
   }
   const _flush = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DELETE FROM ${collection}`));
   const _reset = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DROP TABLE IF EXISTS ${collection}`));
@@ -167,7 +167,6 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
   }
 
   // Init Cache
-  if(dbPath !== ':memory:') _reset();
   _createCacheTables();
 
   return {
