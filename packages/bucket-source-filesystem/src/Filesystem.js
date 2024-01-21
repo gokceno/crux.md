@@ -16,8 +16,7 @@ export const FileSystem = ({ bucketPath }) => {
   }
   const list = async ({ collection, locale, omitBody = true }) => {
     try {
-      if(locale !== undefined) _root.push(locale);
-      const filenames = await fs.readdir(path.join(..._root, 'collections', collection));
+      const filenames = await fs.readdir(path.join(..._root, (locale ?? ''), 'collections', collection));
       const filteredFiles = filenames.filter(filename => filename.split('.')[1] === _defaultFileExtension);
       const filePromises = filteredFiles.map(async (filename) => {
         const file = await open({ filename: path.join((locale ?? ''), 'collections', collection, filename) });
@@ -40,9 +39,7 @@ export const FileSystem = ({ bucketPath }) => {
     }
   }
   const get = async({ filename, locale }) => {
-    let file;
-    if(locale !== undefined) _root.push(locale);
-    file = await open({ filename: path.join('singles', [filename, _defaultFileExtension].join('.')) });
+    let file = await open({ filename: path.join((locale ?? ''), 'singles', [filename, _defaultFileExtension].join('.')) });
     return {
       _id: filename,
       _slug: filename,
