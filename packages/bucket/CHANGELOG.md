@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 0.3.0
+
+### Minor Changes
+
+- fab043c: Buckets now cache based on locale as well.
+
 ## 0.2.0
 
 ### Minor Changes

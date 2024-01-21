@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.0.4
+
+### Patch Changes
+
+- 6a10c3e: Fixed an issue causing locales added to base path twice.
+
 ## 0.0.3
 
 ### Patch Changes

@@ -1,3 +1,14 @@
+version: 1
+prompts:
+  - name: "summarize"
+    prompt: Summarize content for a 2nd grader.
+    for:
+       - products
+       - movies
+  - name: "generate_tagline"
+    prompt: Generate a 1-sentence tag line from the given content.
+    for:
+        - movies
 collections:
  - products:
     - id: "int"

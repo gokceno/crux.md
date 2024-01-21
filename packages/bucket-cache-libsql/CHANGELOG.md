@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.0
+
+### Minor Changes
+
+- e2de267: Cache now accepts locale for multilingual caching.
+
 ## 0.2.0
 
 ### Minor Changes
