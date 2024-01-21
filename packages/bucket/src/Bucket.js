@@ -5,6 +5,7 @@ import { typof } from '@gokceno/crux-typof';
 
 export const Bucket = () => {
   let _cache;
+  let _locale;
   let _source = {};
   let _collection;
   let _single;
@@ -41,10 +42,11 @@ export const Bucket = () => {
     }
     return this;
   }
-  function load({ source, cache }) {
+  function load({ source, cache, locale }) {
     if(source == undefined) throw new Error('Source is not defined'); // TODO: Check if directories are readable
     _source = source;
     _cache = cache;
+    _locale = locale;
     return this;
   }
   function initCache(cache) {
@@ -68,14 +70,14 @@ export const Bucket = () => {
   const _fetchCollection = async(params = {}) => {
     const { limit, offset = 0 } = params;
     if(!_cache.isCached({ collection: _collection }) || limit === 1) {
-      const list = await _source.list({ collection: _collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
+      const list = await _source.list({ locale: _locale, collection: _collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
       if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
       const expandedList = await list.map(item => {
         _expansions.map(async (expansion) => {
           const toReplace = await item[Object.keys(expansion)[0]];
           item[Object.keys(expansion)[0]] = async () => {
             const [ collection, propName ] = Object.values(expansion)[0].split('/');
-            return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
+            return (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
           }
         });
         return item;
@@ -106,12 +108,12 @@ export const Bucket = () => {
   }
   const _fetchSingle = async() => {
     if(!_cache.isCached({ single: _single })) {
-      let data = await _source.get({ filename: _single });
+      let data = await _source.get({ locale: _locale, filename: _single });
       await _expansions.map(async (expansion) => {
         const toReplace = await data[Object.keys(expansion)[0]];
         data[Object.keys(expansion)[0]] = async () => {
           const [ collection, propName ] = Object.values(expansion)[0].split('/');
-          return (await _source.list({ collection })).filter(item => (toReplace || []).includes(item[propName]));
+          return (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
         }
       });
       return _cache.populate({ single: _single, data });
