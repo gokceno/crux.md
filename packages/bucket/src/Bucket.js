@@ -69,7 +69,7 @@ export const Bucket = () => {
   }
   const _fetchCollection = async(params = {}) => {
     const { limit, offset = 0 } = params;
-    if(!_cache.isCached({ collection: _collection }) || limit === 1) {
+    if(!_cache.isCached({ collection: _collection, locale: _locale }) || limit === 1) {
       const list = await _source.list({ locale: _locale, collection: _collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
       if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
       const expandedList = await list.map(item => {
@@ -82,7 +82,7 @@ export const Bucket = () => {
         });
         return item;
       });
-      _cache.populate({ collection: _collection, data: expandedList });
+      _cache.populate({ collection: _collection, data: expandedList, locale: _locale });
       const filteredList = expandedList.filter(item => {
         return _filters.every(([field, criteria]) => {
           const [ condition ] = Object.keys(criteria);
@@ -104,10 +104,10 @@ export const Bucket = () => {
       }
       return (slicedList || filteredList);
     }
-    return _cache.get({ collection: _collection, filters: _filters, order: _order, limit, offset });
+    return _cache.get({ collection: _collection, locale: _locale, filters: _filters, order: _order, limit, offset });
   }
   const _fetchSingle = async() => {
-    if(!_cache.isCached({ single: _single })) {
+    if(!_cache.isCached({ single: _single, locale: _locale })) {
       let data = await _source.get({ locale: _locale, filename: _single });
       await _expansions.map(async (expansion) => {
         const toReplace = await data[Object.keys(expansion)[0]];
@@ -116,9 +116,9 @@ export const Bucket = () => {
           return (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
         }
       });
-      return _cache.populate({ single: _single, data });
+      return _cache.populate({ single: _single, data, locale: _locale });
     }
-    return _cache.get({ single: _single });
+    return _cache.get({ single: _single, locale: _locale });
   }
   return {
     manifest,
