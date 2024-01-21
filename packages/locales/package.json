@@ -1,0 +1,10 @@
+{
+  "name": "@gokceno/crux-locales",
+  "repository": "git+https://github.com/gokceno/crux.md.git",
+  "version": "0.0.1",
+  "main": "./src/index.js",
+  "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
