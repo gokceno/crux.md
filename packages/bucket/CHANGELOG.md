@@ -1,5 +1,12 @@
 # @gokceno/crux-bucket
 
+## 0.2.0
+
+### Minor Changes
+
+- 84d02d5: Ability to cache singles
+- c611b23: Added locale selection based on accept headers.
+
 ## 0.1.2
 
 ### Patch Changes

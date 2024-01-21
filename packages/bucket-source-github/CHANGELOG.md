@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.0.4
+
+### Patch Changes
+
+- ed8d545: Better error handling. Added locales.
+
 ## 0.0.3
 
 ### Patch Changes

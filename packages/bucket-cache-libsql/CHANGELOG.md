@@ -1,5 +1,15 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.2.0
+
+### Minor Changes
+
+- 84d02d5: Ability to cache singles
+
+### Patch Changes
+
+- 07a219e: Moved manual initialization of cache tables SQL statements.
+
 ## 0.1.0
 
 ### Minor Changes

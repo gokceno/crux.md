@@ -25,9 +25,10 @@
     "pino-http": "8.3.3",
     "pino-pretty": "10.0.0",
     "@gokceno/crux-graphql-schema": "0.0.3",
-    "@gokceno/crux-bucket": "0.1.2",
-    "@gokceno/crux-bucket-cache-libsql": "0.1.0",
-    "@gokceno/crux-bucket-source-filesystem": "0.0.2",
-    "@gokceno/crux-bucket-source-github": "0.0.3"
+    "@gokceno/crux-locales": "0.0.2",
+    "@gokceno/crux-bucket": "0.2.0",
+    "@gokceno/crux-bucket-cache-libsql": "0.2.0",
+    "@gokceno/crux-bucket-source-filesystem": "0.0.3",
+    "@gokceno/crux-bucket-source-github": "0.0.4"
   }
 }
