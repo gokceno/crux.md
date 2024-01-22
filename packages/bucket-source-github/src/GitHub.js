@@ -18,7 +18,7 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     catch (e) {
       console.error(e);
       if (e instanceof RequestError) throw new Error('GitHub request error, possibly file is not found.');
-      throw new Error('File opn error.');
+      throw new Error('File open error.');
     }
   }
   const list = async ({ collection, locale, omitBody = true }) => {
