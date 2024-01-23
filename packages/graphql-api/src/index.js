@@ -53,7 +53,7 @@ const mapGraphQLTypes = (type, leaf) => {
       type: GraphQLBoolean
     }
   }
-  else if(Array.isArray(type) && (type.length == 0 || ['string', 'number'].includes(typeof type[0]))) {
+  else if(typeof type === 'object' && Array.isArray(type) && (type.length == 0 || ['string', 'number'].includes(typeof type[0]))) {
     // TODO: Can create different types for string array and int array
     mappedType = {
       type: new GraphQLList(
@@ -61,7 +61,7 @@ const mapGraphQLTypes = (type, leaf) => {
       )
     }
   }
-  else if(Array.isArray(type) && type.length > 0 && typeof type[0] == 'object') {
+  else if(typeof type === 'object' && Array.isArray(type) && type.length > 0 && typeof type[0] == 'object') {
     mappedType = {
       type: new GraphQLList(
         new GraphQLObjectType({
@@ -71,17 +71,34 @@ const mapGraphQLTypes = (type, leaf) => {
       )
     }
   }
+  else if(typeof type === 'object' && !Array.isArray(type)) {
+    mappedType = {
+      type: new GraphQLObjectType({
+        name: Object.keys(leaf)[0] + '_' + Math.random().toString(36).slice(2, 6),
+        fields: mapField(Object.values(leaf)[0]),
+      })
+    }
+  }
   else {
     throw new Error('Input type cannot be mapped to a GraphQL type.');
   }
   return mappedType;
 }
+const mapField = (node) => {
+  let leafObj = {};
+  Object.entries(node).map(([name, type]) => {
+    let leafChildObj = {};
+    leafChildObj[name] = type;
+    leafObj[name] = mapGraphQLTypes(type, leafChildObj);
+  });
+  return leafObj;
+}
 const mapFields = (node, nodes, depth = 0) => {
   let leafObj = {};
   if (nodes !== undefined) Object.values(node)[0].push({ _body: 'string' });
-  Object.values(node)[0].map(leaf => {
+  (Object.values(node)[0] ?? []).map(leaf => {
     Object.entries(leaf).map(([name, type]) => {
-      if(type.includes('/')) {
+      if(typeof type === 'string' && type.includes('/')) {
         if(depth < 1 && nodes !== undefined) {
           const [targetNodeName, targetNodeVia] = type.split('/');
           const targetNode = nodes.filter(leaf => Object.keys(leaf)[0] == targetNodeName);

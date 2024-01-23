@@ -27,7 +27,7 @@ export const Resolvers = ({ bucket }) => {
       .filter(item => Object.keys(item) == single)
       .map(item => {
         return Object.values(item)[0].filter(prop => {
-          return Object.values(prop)[0].includes('/')
+          return typeof Object.values(prop)[0] === 'string' && Object.values(prop)[0].includes('/')
         }
       )
     });
