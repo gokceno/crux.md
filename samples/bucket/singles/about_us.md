@@ -15,6 +15,12 @@ nav:
         url: "apple.com"
       - label: "xxx"
         url: "microsoft.com"
+motto:
+  typename: "xyzxyzme"
+  texts:
+    - text: Deneme text
+      highlighted: true
+      breakpoint: false
 ---
 
 Film bilgileri hazırlık aşamasında.

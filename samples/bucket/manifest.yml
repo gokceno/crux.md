@@ -41,6 +41,12 @@ singles:
     - title: "string"
     - tags: []
     - related_movies: "movies/title"
+    - motto:
+        typename: "string"
+        texts:
+          - text: "string"
+            highlighted: "boolean"
+            breakPoint: "boolean"
     - nav: 
       - label: "string"
       - url: "string"

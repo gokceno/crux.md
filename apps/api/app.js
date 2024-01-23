@@ -32,21 +32,25 @@ app.use(pinoHttpLogger);
 app.use(bodyParser.json());
 app.use(express.json());
 
+app.get('/', (req, res) => res.redirect('https://github.com/gokceno/crux.md'));
+
 app.all('/graphql', async (req, res) => {
   // Set up buckets
   const bucket = Bucket().load({
     ...(req.acceptsLanguages()[0] !== '*') ? { locale: req.acceptsLanguages(locales) } : {},
-    // source: FileSystem({ bucketPath: '../../../koc-system-website/apps/api/.bucket' }),
+    source: FileSystem({ bucketPath: '../../samples/bucket' }),
+    /*
     source: GitHub({
       owner: 'gokceno',
       repo: 'crux.md',
       basePath: 'samples/bucket',
       auth: process.env.GITHUB_TOKEN,
     })
+    */
   });
   const manifest = await bucket.manifest();
   bucket.initCache(BucketCache({
-    dbPath: ':memory:', // Use memory only if defined global otherwise it's useless as it recreates cache on every request.
+    dbPath: '../../samples/bucket/cache.sqlite', // Use memory only if defined global otherwise it's useless as it recreates cache on every request.
     expires: '100 SECONDS',
     manifest,
   }));
