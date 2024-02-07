@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api
 
+## 0.2.1
+
+### Patch Changes
+
+- Replaced random GraphQL names with something meaningful.
+
 ## 0.2.0
 
 ### Minor Changes
