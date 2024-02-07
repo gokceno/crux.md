@@ -37,7 +37,7 @@ const mappings = {
     _eq: { type: GraphQLBoolean },
   }
 }
-const mapGraphQLTypes = (type, leaf) => {
+const mapGraphQLTypes = (type, leaf, prefix) => {
   let mappedType = {};
   if(['string', 'string!', 'date', 'date!', 'body', 'body!'].includes(type)) {
     mappedType = {
@@ -67,7 +67,7 @@ const mapGraphQLTypes = (type, leaf) => {
     mappedType = {
       type: new GraphQLList(
         new GraphQLObjectType({
-          name: Object.keys(leaf)[0] + '_' + Math.random().toString(36).slice(2, 6),
+          name: [prefix, Object.keys(leaf)[0]].join('_'),
           fields: mapFields(leaf),
         })
       )
@@ -76,7 +76,7 @@ const mapGraphQLTypes = (type, leaf) => {
   else if(typeof type === 'object' && !Array.isArray(type)) {
     mappedType = {
       type: new GraphQLObjectType({
-        name: Object.keys(leaf)[0] + '_' + Math.random().toString(36).slice(2, 6),
+        name: [prefix, Object.keys(leaf)[0]].join('_'),
         fields: mapField(Object.values(leaf)[0]),
       })
     }
@@ -95,7 +95,7 @@ const mapField = (node) => {
   });
   return leafObj;
 }
-const mapFields = (node, nodes, depth = 0) => {
+const mapFields = (node, nodes, depth = 0, prefix) => {
   let leafObj = {};
   if (nodes !== undefined) Object.values(node)[0].push({ _body: 'string' });
   (Object.values(node)[0] ?? []).map(leaf => {
@@ -107,15 +107,15 @@ const mapFields = (node, nodes, depth = 0) => {
           leafObj[name] = {
             type: new GraphQLList(
               new GraphQLObjectType({
-                name: Object.keys(targetNode[0])[0] + '_' + Math.random().toString(36).slice(2, 6),
-                fields: () => mapFields(targetNode[0], nodes, depth + 1),
+                name: [prefix, name].join('_'),
+                fields: () => mapFields(targetNode[0], nodes, depth + 1, [prefix, name].join('_')),
               })
             )
           }
         }
       }
       else {
-        leafObj[name] = mapGraphQLTypes(type, leaf);
+        leafObj[name] = mapGraphQLTypes(type, leaf, prefix);
       }
     });
   });
@@ -211,14 +211,14 @@ export const transform = ({ nodes, node, resolver, resolveBy }) => {
     nodeObj[name]['type'] = new GraphQLList(
       new GraphQLObjectType({
         name,
-        fields: mapFields(node, nodes),
+        fields: mapFields(node, nodes, 0, name),
       })
     );
   }
   else {
     nodeObj[name]['type'] = new GraphQLObjectType({
       name,
-      fields: mapFields(node, nodes),
+      fields: mapFields(node, nodes, 0, name),
     });
   }
   return nodeObj;
