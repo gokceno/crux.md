@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api
 
+## 0.2.0
+
+### Minor Changes
+
+- Ability to add non-nullable fields to the GraphQL endpoints via manifest.yml
+
 ## 0.1.0
 
 ### Minor Changes

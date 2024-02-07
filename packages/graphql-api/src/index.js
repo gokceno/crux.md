@@ -6,7 +6,8 @@ import {
   GraphQLInt, 
   GraphQLBoolean,
   GraphQLInputObjectType,
-  GraphQLEnumType, 
+  GraphQLEnumType,
+  GraphQLNonNull,
 } from 'graphql';
 
 const mappings = {
@@ -38,23 +39,24 @@ const mappings = {
 }
 const mapGraphQLTypes = (type, leaf) => {
   let mappedType = {};
-  if(['string', 'date', 'body'].includes(type)) {
+  if(['string', 'string!', 'date', 'date!', 'body', 'body!'].includes(type)) {
     mappedType = {
-      type: GraphQLString
+      type: type.endsWith('!') ? new GraphQLNonNull(GraphQLString) : GraphQLString
     }
   }
-  else if(['int', 'integer'].includes(type)) {
+  else if(['int', 'integer', 'int!', 'integer!'].includes(type)) {
     mappedType = {
-      type: GraphQLInt
+      type: type.endsWith('!') ? new GraphQLNonNull(GraphQLInt) : GraphQLInt
     }
   }
-  else if(['bool', 'boolean'].includes(type)) {
+  else if(['bool', 'boolean', 'bool!', 'boolean!'].includes(type)) {
     mappedType = {
-      type: GraphQLBoolean
+      type: type.endsWith('!') ? new GraphQLNonNull(GraphQLBoolean) : GraphQLBoolean
     }
   }
   else if(typeof type === 'object' && Array.isArray(type) && (type.length == 0 || ['string', 'number'].includes(typeof type[0]))) {
     // TODO: Can create different types for string array and int array
+    // TODO: Cannot define non-nullable for arrays
     mappedType = {
       type: new GraphQLList(
         GraphQLString

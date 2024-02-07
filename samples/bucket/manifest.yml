@@ -25,15 +25,15 @@ collections:
  - movies:
     - layout: "string"
     - title: "string"
-    - on_homepage: "bool"
-    - in_theatres: "bool"
-    - in_theatres_date: "date"
+    - on_homepage: "bool!"
+    - in_theatres: "bool!"
+    - in_theatres_date: "date!"
     - tag_line: "string"
     - poster_url: "string"
     - video_url: "string"
     - is_active: "bool"
     - social_media:
-      - type: "string"
+      - type: "string!"
       - url: "string"
     - related_movies: "movies/title"
 singles:
@@ -42,7 +42,7 @@ singles:
     - tags: []
     - related_movies: "movies/title"
     - motto:
-        typename: "string"
+        typename: "string!"
         texts:
           - text: "string"
             highlighted: "boolean"

@@ -1,14 +1,14 @@
 {
   "name": "@gokceno/crux-graphql-schema",
   "repository": "git+https://github.com/gokceno/crux.md.git",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "./src/index.js",
   "type": "module",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@gokceno/crux-graphql-api": "0.1.0",
+    "@gokceno/crux-graphql-api": "0.2.0",
     "@gokceno/crux-graphql-api-resolvers": "0.1.0",
     "graphql": "^16.8.1"
   }
