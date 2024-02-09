@@ -37,7 +37,7 @@ const mappings = {
     _eq: { type: GraphQLBoolean },
   }
 }
-const mapGraphQLTypes = (type, leaf, prefix) => {
+const mapGraphQLTypes = (type, leaf, nodes, depth = 0, prefix) => {
   let mappedType = {};
   if(['string', 'string!', 'date', 'date!', 'body', 'body!'].includes(type)) {
     mappedType = {
@@ -63,12 +63,12 @@ const mapGraphQLTypes = (type, leaf, prefix) => {
       )
     }
   }
-  else if(typeof type === 'object' && Array.isArray(type) && type.length > 0 && typeof type[0] == 'object') {
+  else if(typeof type === 'object' && Array.isArray(type) && type.length > 0 && typeof type[0] === 'object') {
     mappedType = {
       type: new GraphQLList(
         new GraphQLObjectType({
           name: [prefix, Object.keys(leaf)[0]].join('_'),
-          fields: mapFields(leaf),
+          fields: mapFields(leaf, nodes, depth, [prefix, Object.keys(leaf)[0]].join('_')),
         })
       )
     }
@@ -77,8 +77,21 @@ const mapGraphQLTypes = (type, leaf, prefix) => {
     mappedType = {
       type: new GraphQLObjectType({
         name: [prefix, Object.keys(leaf)[0]].join('_'),
-        fields: mapField(Object.values(leaf)[0]),
+        fields: mapField(Object.values(leaf)[0], nodes),
       })
+    }
+  }
+  else if(typeof type === 'string' && type.includes('/')) {
+    const [targetNodeName, targetNodeVia] = type.split('/');
+    const targetNode = nodes.filter(leaf => Object.keys(leaf)[0] == targetNodeName);
+    if (targetNode === undefined) throw new Error('Target node cannot be mapped to a GraphQL type.');
+    mappedType = {
+      type: new GraphQLList(
+        new GraphQLObjectType({
+          name: [prefix, Object.keys(leaf)[0]].join('_'),
+          fields: () => mapFields(targetNode[0], nodes, depth + 1, [prefix, targetNodeName].join('_')),
+        })
+      )
     }
   }
   else {
@@ -86,12 +99,12 @@ const mapGraphQLTypes = (type, leaf, prefix) => {
   }
   return mappedType;
 }
-const mapField = (node) => {
+const mapField = (node, nodes) => {
   let leafObj = {};
   Object.entries(node).map(([name, type]) => {
     let leafChildObj = {};
     leafChildObj[name] = type;
-    leafObj[name] = mapGraphQLTypes(type, leafChildObj);
+    leafObj[name] = mapGraphQLTypes(type, leafChildObj, nodes, 0, name); // TODO: Depth is always 0, may be a problem?
   });
   return leafObj;
 }
@@ -115,7 +128,7 @@ const mapFields = (node, nodes, depth = 0, prefix) => {
         }
       }
       else {
-        leafObj[name] = mapGraphQLTypes(type, leaf, prefix);
+        leafObj[name] = mapGraphQLTypes(type, leaf, nodes, depth + 1, prefix);
       }
     });
   });
