@@ -38,8 +38,7 @@ app.all('/graphql', async (req, res) => {
   // Set up buckets
   const bucket = Bucket().load({
     ...(req.acceptsLanguages()[0] !== '*') ? { locale: req.acceptsLanguages(locales) } : {},
-    //source: FileSystem({ bucketPath: '../../samples/bucket' }),
-    source: FileSystem({ bucketPath: '../../../koc-system-website/apps/api/.bucket' }),
+    source: FileSystem({ bucketPath: '../../samples/bucket' }),
     /*
     source: GitHub({
       owner: 'gokceno',
@@ -51,7 +50,7 @@ app.all('/graphql', async (req, res) => {
   });
   const manifest = await bucket.manifest();
   bucket.initCache(BucketCache({
-    dbPath: '../../samples/bucket/.cache.sqlite', // Use memory only if defined global otherwise it's useless as it recreates cache on every request.
+    dbPath: '../../samples/bucket/cache.sqlite', // Use memory only if defined global otherwise it's useless as it recreates cache on every request.
     expires: '100 SECONDS',
     manifest,
   }));
