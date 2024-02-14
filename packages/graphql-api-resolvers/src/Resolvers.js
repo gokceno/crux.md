@@ -10,7 +10,10 @@ export const Resolvers = ({ bucket }) => {
       .filter(item => Object.keys(item) == collection)
       .map(item => {
         return Object.values(item)[0].filter(prop => {
-          return Object.values(prop)[0].includes('/')
+          if(typeof Object.values(prop)[0] === 'object') {
+            return Object.values(Object.values(prop)[0]).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
+          }
+          return typeof Object.values(prop)[0] === 'string' && Object.values(prop)[0].includes('/')
         }
       )
     });
