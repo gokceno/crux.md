@@ -24,7 +24,7 @@
     "pino": "8.11.0",
     "pino-http": "8.3.3",
     "pino-pretty": "10.0.0",
-    "@gokceno/crux-graphql-schema": "0.0.6",
+    "@gokceno/crux-graphql-schema": "0.0.7",
     "@gokceno/crux-locales": "0.0.2",
     "@gokceno/crux-bucket": "0.3.0",
     "@gokceno/crux-bucket-cache-libsql": "0.3.0",

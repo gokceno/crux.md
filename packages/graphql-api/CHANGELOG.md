@@ -1,5 +1,16 @@
 # @gokceno/crux-graphql-api
 
+## 0.3.0
+
+### Minor Changes
+
+- aef599e: Ability to add expansions within sub-components.
+
+### Patch Changes
+
+- Updated dependencies [c0fbe4b]
+  - @gokceno/crux-graphql-api-resolvers@0.2.0
+
 ## 0.2.1
 
 ### Patch Changes

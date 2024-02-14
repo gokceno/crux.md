@@ -106,19 +106,48 @@ export const Bucket = () => {
     }
     return _cache.get({ collection: _collection, locale: _locale, filters: _filters, order: _order, limit, offset });
   }
-  const _fetchSingle = async() => {
-    if(!_cache.isCached({ single: _single, locale: _locale })) {
+  const _fetchSingle = async () => {
+    if (!_cache.isCached({ single: _single, locale: _locale })) {
       let data = await _source.get({ locale: _locale, filename: _single });
       await _expansions.map(async (expansion) => {
-        const toReplace = await data[Object.keys(expansion)[0]];
-        data[Object.keys(expansion)[0]] = async () => {
-          const [ collection, propName ] = Object.values(expansion)[0].split('/');
-          return (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
+        if(typeof Object.values(expansion)[0] === 'string') {
+          await _handleStringExpansion(expansion, data);
+        } 
+        else if (typeof Object.values(expansion)[0] === 'object') {
+          // TODO: Cannot cache expanded records, instead caches the reference values.
+          await _handleObjectExpansion(expansion, data);
+        } 
+        else {
+          throw new Error('YAML formatting error in expanding properties.');
         }
-      });
+      })
       return _cache.populate({ single: _single, data, locale: _locale });
     }
     return _cache.get({ single: _single, locale: _locale });
+  }
+  const _handleStringExpansion = async (expansion, data) => {
+    const toReplace = await data[Object.keys(expansion)[0]];
+    data[Object.keys(expansion)[0]] = async () => {
+      const [collection, propName] = Object.values(expansion)[0].split('/');
+      return (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
+    }
+  }
+  const _handleObjectExpansion = async (expansion, data) => {
+    const toReplace = await data[Object.keys(expansion)[0]];
+    await Object.entries(expansion).map(async ([componentName, componentItems]) => {
+      await Object.entries(componentItems)
+      .filter(([componentItemName, componentItemType]) => componentItemType.includes('/'))
+      .map(async ([componentItemName, componentItemType]) => {
+        if (data[componentName] !== undefined) {
+          const toReplaceValue = await toReplace[componentItemName];
+          const [collection, propName] = componentItemType.split('/');
+          data[componentName][componentItemName] = await (async () => {
+            const list = await _source.list({ locale: _locale, collection });
+            return list.filter(item => (toReplaceValue || []).includes(item[propName]));
+          })();
+        }
+      })
+    })
   }
   return {
     manifest,
