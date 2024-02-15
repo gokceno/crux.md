@@ -6,14 +6,14 @@ export const Resolvers = ({ bucket }) => {
     // TODO: Sub-component handling in singles, is missing for collections
     if(bucket == undefined) throw new Error('Bucket must be defined');
     const manifest = await bucket.manifest();
-    const expansions = manifest.collections
+    const [ expansions ] = manifest.collections
       .filter(item => Object.keys(item) == collection)
       .map(item => {
-        return Object.values(item)[0].filter(prop => {
-          if(typeof Object.values(prop)[0] === 'object') {
-            return Object.values(Object.values(prop)[0]).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
+        return Object.entries(Object.values(item)[0]).filter(([name, type]) => {
+          if(typeof type === 'object') {
+            return Object.values(type).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
           }
-          return typeof Object.values(prop)[0] === 'string' && Object.values(prop)[0].includes('/')
+          return typeof type === 'string' && type.includes('/')
         }
       )
     });
@@ -21,24 +21,25 @@ export const Resolvers = ({ bucket }) => {
       .select({ collection })
       .filter({ filters })
       .order({ order });
-    expansions[0].every(expand => bucket.expand({ expand }));
+    expansions.every(expand => bucket.expand({ [expand[0]]: expand[1] }));
     return bucket.fetch(limit);
   }
   const single = async (single) => {
     if(bucket == undefined) throw new Error('Bucket must be defined');
     const manifest = await bucket.manifest();
-    const expansions = manifest.singles
+    const [ expansions ] = manifest.singles
       .filter(item => Object.keys(item) == single)
       .map(item => {
-        return Object.values(item)[0].filter(prop => {
-          if(typeof Object.values(prop)[0] === 'object') {
-            return Object.values(Object.values(prop)[0]).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
+        return Object.entries(Object.values(item)[0]).filter(([name, type]) => {
+          if(typeof type === 'object') {
+            return Object.values(type).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
           }
-          return typeof Object.values(prop)[0] === 'string' && Object.values(prop)[0].includes('/')
-        })
+          return typeof type === 'string' && type.includes('/')
+        }
+      )
     });
     bucket.select({ single });
-    expansions[0].every(expand => bucket.expand({ expand }));
+    expansions.every(expand => bucket.expand({ expand }));
     return bucket.fetch();
   }
   return { 
