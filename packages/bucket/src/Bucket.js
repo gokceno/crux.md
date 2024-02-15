@@ -36,7 +36,7 @@ export const Bucket = () => {
     _order = [];
     return this;
   }
-  function expand({ expand }) {
+  function expand(expand) {
     if(expand !== undefined) {
       _expansions.push(expand);
     }
@@ -74,10 +74,14 @@ export const Bucket = () => {
       if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
       const expandedList = await list.map(item => {
         _expansions.map(async (expansion) => {
-          const toReplace = await item[Object.keys(expansion)[0]];
-          item[Object.keys(expansion)[0]] = async () => {
-            const [ collection, propName ] = Object.values(expansion)[0].split('/');
-            return (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
+          if(typeof Object.values(expansion)[0] === 'string') {
+            await _handleStringExpansion(expansion, item);
+          } 
+          else if (typeof Object.values(expansion)[0] === 'object') {
+            await _handleObjectExpansion(expansion, item);
+          } 
+          else {
+            throw new Error('YAML formatting error in expanding properties.');
           }
         });
         return item;
@@ -114,7 +118,6 @@ export const Bucket = () => {
           await _handleStringExpansion(expansion, data);
         } 
         else if (typeof Object.values(expansion)[0] === 'object') {
-          // TODO: Cannot cache expanded records, instead caches the reference values.
           await _handleObjectExpansion(expansion, data);
         } 
         else {
@@ -136,7 +139,7 @@ export const Bucket = () => {
     const toReplace = await data[Object.keys(expansion)[0]];
     await Object.entries(expansion).map(async ([componentName, componentItems]) => {
       await Object.entries(componentItems)
-      .filter(([componentItemName, componentItemType]) => componentItemType.includes('/'))
+      .filter(([componentItemName, componentItemType]) => typeof componentItemType === 'string' && componentItemType.includes('/'))
       .map(async ([componentItemName, componentItemType]) => {
         if (data[componentName] !== undefined) {
           const toReplaceValue = await toReplace[componentItemName];
