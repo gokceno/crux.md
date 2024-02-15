@@ -8,12 +8,16 @@ const schema = ({ bucket, manifest }) => new GraphQLSchema({
     name: 'Query',
     fields: () => {
       const fields = {};
-      manifest.collections.map(node => transform({ nodes: manifest.collections, node, resolver: Resolvers({ bucket }), resolveBy: 'collection' })).forEach(field => {
-        fields[Object.keys(field)[0]] = field[Object.keys(field)[0]];
-      });
-      manifest.singles.map(node => transform({ nodes: manifest.collections, node, resolver: Resolvers({ bucket }), resolveBy: 'single' })).forEach(field => {
-        fields[Object.keys(field)[0]] = field[Object.keys(field)[0]];
-      });
+      if(manifest?.collections !== undefined) {
+        manifest.collections.map(node => transform({ nodes: manifest.collections, node, resolver: Resolvers({ bucket }), resolveBy: 'collection' })).forEach(field => {
+          fields[Object.keys(field)[0]] = field[Object.keys(field)[0]];
+        });
+      }
+      if(manifest?.singles !== undefined) {
+        manifest.singles.map(node => transform({ nodes: manifest.collections, node, resolver: Resolvers({ bucket }), resolveBy: 'single' })).forEach(field => {
+          fields[Object.keys(field)[0]] = field[Object.keys(field)[0]];
+        });
+      }
       return fields;
     }
   }),
