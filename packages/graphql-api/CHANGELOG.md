@@ -1,5 +1,16 @@
 # @gokceno/crux-graphql-api
 
+## 1.0.0
+
+### Major Changes
+
+- New YAML format in manifest.yml
+
+### Patch Changes
+
+- Updated dependencies
+  - @gokceno/crux-graphql-api-resolvers@1.0.0
+
 ## 0.3.1
 
 ### Patch Changes
