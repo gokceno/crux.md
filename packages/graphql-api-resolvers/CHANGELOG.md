@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api-resolvers
 
+## 1.0.1
+
+### Patch Changes
+
+- Ability to expand from root records in singles.
+
 ## 1.0.0
 
 ### Major Changes

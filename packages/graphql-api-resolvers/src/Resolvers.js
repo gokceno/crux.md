@@ -39,7 +39,7 @@ export const Resolvers = ({ bucket }) => {
       )
     });
     bucket.select({ single });
-    expansions.every(expand => bucket.expand({ expand }));
+    expansions.every(expand => bucket.expand({ [expand[0]]: expand[1] }));
     return bucket.fetch();
   }
   return { 
