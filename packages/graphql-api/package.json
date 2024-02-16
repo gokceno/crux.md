@@ -1,7 +1,7 @@
 {
   "name": "@gokceno/crux-graphql-api",
   "repository": "git+https://github.com/gokceno/crux.md.git",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "./src/index.js",
   "type": "module",
   "publishConfig": {

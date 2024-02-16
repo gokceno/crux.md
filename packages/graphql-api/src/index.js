@@ -103,7 +103,8 @@ const mapField = (node, nodes) => {
   let leafObj = {};
   Object.entries(Object.values(node)[0]).map(([name, type]) => {
     // TODO: Depth is always 0, may be a problem?
-    if(!(typeof type === 'string' && type.includes('/'))) leafObj[name] = mapGraphQLTypes(type, name, nodes, 0, name);
+    // if(!(typeof type === 'string' && type.includes('/'))) leafObj[name] = mapGraphQLTypes(type, name, nodes, 0, name);
+    leafObj[name] = mapGraphQLTypes(type, name, nodes, 0, name);
   });
   return leafObj;
 }

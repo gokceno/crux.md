@@ -147,7 +147,7 @@ export const Bucket = () => {
           data[componentName][componentItemName] = await (async () => {
             const list = await _source.list({ locale: _locale, collection });
             return list.filter(item => (toReplaceValue || []).includes(item[propName]));
-          })();
+          }); // ();
         }
       })
     })

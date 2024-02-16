@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.0.1
+
+### Patch Changes
+
+- Ability to expand within sub-components root.
+
 ## 1.0.0
 
 ### Major Changes

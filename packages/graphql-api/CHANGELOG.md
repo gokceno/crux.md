@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api
 
+## 1.0.2
+
+### Patch Changes
+
+- Ability to expand within sub-components root.
+
 ## 1.0.1
 
 ### Patch Changes
