@@ -3,7 +3,6 @@ export const Resolvers = ({ bucket }) => {
   const filterables = ['collection'];
   const collection = async (collection, { filters, order, limit }) => {
     // TODO: Error is raised when filter or order is selected but no criteria is supplied
-    // TODO: Sub-component handling in singles, is missing for collections
     if(bucket == undefined) throw new Error('Bucket must be defined');
     const manifest = await bucket.manifest();
     const [ expansions ] = manifest.collections
