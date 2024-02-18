@@ -95,7 +95,7 @@ export const Bucket = () => {
         });
       });
       if(_order.length > 0 || filteredList.length > 0) {
-        _order.every(([field, criteria]) => filteredList.sort((a,b) => Sort[criteria](a[field], b[field])));
+        _order.every(([field, criteria]) => filteredList.sort((a, b) => Sort[criteria](a[field], b[field])));
       }
       let slicedList;
       if(limit !== undefined) {
@@ -132,7 +132,22 @@ export const Bucket = () => {
     const toReplace = await data[Object.keys(expansion)[0]];
     data[Object.keys(expansion)[0]] = async () => {
       const [collection, propName] = Object.values(expansion)[0].split('/');
-      return (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
+      const list = (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
+      const expandedList = await list.map(item => {
+        _expansions.map(async (expansion) => {
+          if(typeof Object.values(expansion)[0] === 'string') {
+            await _handleStringExpansion(expansion, item);
+          } 
+          else if (typeof Object.values(expansion)[0] === 'object') {
+            await _handleObjectExpansion(expansion, item);
+          } 
+          else {
+            throw new Error('YAML formatting error in expanding properties.');
+          }
+        });
+        return item;
+      });
+      return expandedList;
     }
   }
   const _handleObjectExpansion = async (expansion, data) => {
@@ -146,7 +161,22 @@ export const Bucket = () => {
           const [collection, propName] = componentItemType.split('/');
           data[componentName][componentItemName] = await (async () => {
             const list = await _source.list({ locale: _locale, collection });
-            return list.filter(item => (toReplaceValue || []).includes(item[propName]));
+            const filteredList = list.filter(item => (toReplaceValue || []).includes(item[propName]));
+            const expandedList = await filteredList.map(item => {
+              _expansions.map(async (expansion) => {
+                if(typeof Object.values(expansion)[0] === 'string') {
+                  await _handleStringExpansion(expansion, item);
+                } 
+                else if (typeof Object.values(expansion)[0] === 'object') {
+                  await _handleObjectExpansion(expansion, item);
+                } 
+                else {
+                  throw new Error('YAML formatting error in expanding properties.');
+                }
+              });
+              return item;
+            });
+            return expandedList;
           }); // ();
         }
       })

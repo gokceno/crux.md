@@ -1,5 +1,4 @@
 import { 
-  GraphQLSchema, 
   GraphQLObjectType, 
   GraphQLString, 
   GraphQLList, 
@@ -114,7 +113,7 @@ const mapFields = (node, nodes, depth = 0, prefix) => {
   Object.entries(Object.values(node)[0])
   .map(([name, type]) => {
     if(typeof type === 'string' && type.includes('/')) {
-      if(depth < 1 && nodes !== undefined) {
+      if(depth < 2 && nodes !== undefined) {
         const [targetNodeName, targetNodeVia] = type.split('/');
         const targetNode = nodes.filter(leaf => Object.keys(leaf)[0] == targetNodeName);
         leafObj[name] = {
