@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.1
+
+### Patch Changes
+
+- 4208c72: Fixed caching collections with expandable properties.
+
 ## 0.3.0
 
 ### Minor Changes

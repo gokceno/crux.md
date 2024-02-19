@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api
 
+## 1.1.0
+
+### Minor Changes
+
+- 03090c7: Increased expansion depth level to 2 (used to expand only the first level).
+
 ## 1.0.2
 
 ### Patch Changes
