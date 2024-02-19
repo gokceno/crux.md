@@ -10,7 +10,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
   }
   const get = ({ isManifest, collection, single, locale, filters, order, limit = -1, offset = 0 }) => { 
     if(isManifest === true) return _getManifest();
-    if(collection !== undefined) return _getCollection({ collection, locale, filters, order, limit: -1, offset: 0 });
+    if(collection !== undefined) return _getCollection({ collection, locale, filters, order, limit, offset });
     if(single !== undefined) return _getSingle({ single, locale });
     return {};
   }
@@ -28,7 +28,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     db.exec(`CREATE TABLE IF NOT EXISTS manifest (id INTEGER PRIMARY KEY, body JSON, _cached_at TEXT)`);
   }
   const _flush = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DELETE FROM ${collection}`));
-  const _reset = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DROP TABLE IF EXISTS ${collection}`));
+  // const _reset = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DROP TABLE IF EXISTS ${collection}`));
   const _isManifestCached = () => !!db.prepare(`SELECT COUNT(1) as count FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.count;
   const _isCollectionCached = ({ collection, locale }) => !!db.prepare(`SELECT COUNT(1) as count FROM collections c WHERE DATETIME(c._cached_at, ?) >= DATETIME() AND c.collection_type = ? AND (c.locale IS NULLIF(?, 'NULL') OR c.locale = ?)`).get([expires, collection, locale])?.count;
   const _isSingleCached = ({ single, locale }) => !!db.prepare(`SELECT COUNT(1) as count FROM singles s WHERE DATETIME(s._cached_at, ?) >= DATETIME() AND s.single_type = ? AND (s.locale IS NULLIF(?, 'NULL') OR s.locale = ?)`).get([expires, single, locale])?.count;
@@ -37,60 +37,68 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     // TODO: on first search (when gathered from MD files) "null" values are displayed, even though they're filtered
     let list = [];
     const collections = db
-      .prepare(`
-        SELECT
-          c.id AS collection_id, 
-          GROUP_CONCAT('"' || cp.prop_name || '":' || cp.prop_value) AS properties
-        FROM collections c
-        LEFT JOIN collections_props cp ON c.id = cp.collection_id
-        WHERE 
-          DATETIME(c._cached_at, '+${expires}') >= DATETIME()
-          AND (c.locale IS NULLIF(?, 'NULL') OR c.locale = ?)
-        GROUP BY
-          c.id
-        HAVING 
-          ${filters.map(([propName, propComparison]) => `MAX(CASE WHEN cp.prop_name = '${propName}' AND ${_constructWhere({ collection, propName, propComparison })} THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
-          c.collection_type = ?
-        ORDER BY
-          ${order.map(o => `MAX(CASE WHEN cp.prop_name = '${o[0]}' THEN cp.prop_value ELSE NULL END) COLLATE NOCASE ${o[1]},`).join(' ')}
-          MAX(cp.prop_value) ASC
-        LIMIT ? OFFSET ?
+    .prepare(`
+      SELECT
+      c.id AS collection_id, 
+      GROUP_CONCAT('"' || cp.prop_name || '":' || cp.prop_value) AS properties
+      FROM collections c
+      LEFT JOIN collections_props cp ON c.id = cp.collection_id
+      WHERE 
+      DATETIME(c._cached_at, '+${expires}') >= DATETIME()
+      AND (c.locale IS NULLIF(?, 'NULL') OR c.locale = ?)
+      GROUP BY
+      c.id
+      HAVING 
+      ${filters.map(([propName, propComparison]) => `MAX(CASE WHEN cp.prop_name = '${propName}' AND ${_constructWhere({ collection, propName, propComparison })} THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
+      c.collection_type = ?
+      ORDER BY
+      ${order.map(o => `MAX(CASE WHEN cp.prop_name = '${o[0]}' THEN cp.prop_value ELSE NULL END) COLLATE NOCASE ${o[1]},`).join(' ')}
+      MAX(cp.prop_value) ASC
+      LIMIT ? OFFSET ?
       `)
-      .all([locale, locale, collection, limit, offset]);
-      collections.map(collection => list.push(JSON.parse(`{${collection.properties}}`)));
-      return list;
+    .all([locale, locale, collection, limit, offset]);
+    collections.map(collection => list.push(JSON.parse(`{${collection.properties}}`)));
+    return list;
   }
   const _getSingle = ({ single, locale }) => {
     const row = db
-      .prepare(`
-        SELECT
-          s.id AS single_id, 
-          GROUP_CONCAT('"' || sp.prop_name || '":' || sp.prop_value) AS properties
-        FROM singles s
-        LEFT JOIN singles_props sp ON s.id = sp.single_id
-        WHERE 
-          s.single_type = ?
-          AND (s.locale IS NULLIF(?, 'NULL') OR s.locale = ?)
-          AND DATETIME(s._cached_at, '+${expires}') >= DATETIME()
+    .prepare(`
+      SELECT
+      s.id AS single_id, 
+      GROUP_CONCAT('"' || sp.prop_name || '":' || sp.prop_value) AS properties
+      FROM singles s
+      LEFT JOIN singles_props sp ON s.id = sp.single_id
+      WHERE 
+      s.single_type = ?
+      AND (s.locale IS NULLIF(?, 'NULL') OR s.locale = ?)
+      AND DATETIME(s._cached_at, '+${expires}') >= DATETIME()
       `)
-      .get([single, locale]);
+    .get([single, locale]);
     return JSON.parse(`{${row.properties}}`);
   }
   const _getManifest = () => JSON.parse(db.prepare(`SELECT m.body FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.body || '{}');  
+
   const _cacheCollection = ({ collection, data, locale }) => {
     _flush();
     data.map(async item => {
       const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection,item._id, locale]);
       const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
-      Object.keys(item)
-        .map(async (prop) => {
-          if (typeof item[prop] === 'function' && item[prop].constructor.name === 'AsyncFunction') {
-            statement.run([row.lastInsertRowid, prop, JSON.stringify(await item[prop]())]);
-          }
-          else {
-            statement.run([row.lastInsertRowid, prop, JSON.stringify(item[prop])]);
-          }
-        });
+      Object.keys(item).map(async (prop) => {
+        if (typeof item[prop] === 'function' && item[prop].constructor.name === 'AsyncFunction') {
+          const data = await item[prop]();
+          const expandedData = await Promise.all(data.map(async (expand) => {
+            let returnObject = {};
+            await Promise.all(Object.entries(expand).map(async ([propName, propValue]) =>
+              returnObject[propName] = typeof propValue === 'function' ? await propValue() : propValue
+            ));
+            return returnObject;
+          }));
+          statement.run([row.lastInsertRowid, prop, JSON.stringify(expandedData)]);
+        }
+        else {
+          statement.run([row.lastInsertRowid, prop, JSON.stringify(await item[prop])]);
+        }
+      });
     });
     return data;
   }
@@ -165,7 +173,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     let statement = [];
     statement.push(
       ..._whereComponents[compareBy](manifestDataType, compareWith)
-    );
+      );
     return statement.join(' AND ');
   }
 
