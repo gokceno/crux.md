@@ -55,8 +55,8 @@ export const Bucket = () => {
     return this;
   }
   const fetch = async (params) => {
-    if(_collection !== undefined) return _fetchCollection(params);
-    if(_single !== undefined) return _fetchSingle();
+    if(_collection !== undefined) return _fetchCollection({ cache: _cache, source: _source, collection: _collection, order: _order, locale: _locale, filters: _filters, expansions: _expansions, ...params });
+    if(_single !== undefined) return _fetchSingle({ cache: _cache, source: _source, single: _single, expansions: _expansions });
     throw new Error('Select failed.');
   }
   const manifest = async() => {
@@ -68,12 +68,12 @@ export const Bucket = () => {
     return _cache.get({ isManifest: true });
   }
   const _fetchCollection = async(params = {}) => {
-    const { limit, offset = 0 } = params;
-    if(!_cache.isCached({ collection: _collection, locale: _locale }) || limit === 1) {
-      const list = await _source.list({ locale: _locale, collection: _collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
-      if(_source.isFiltered === true && _source.isOrdered === true && _source.isExpanded === true) return list;
+    const { cache, source, collection, locale, filters, order, expansions, limit, offset = 0 } = params;
+    if(!cache.isCached({ collection, locale}) || limit === 1) {
+      const list = await source.list({ locale, collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
+      if(source.isFiltered === true && source.isOrdered === true && source.isExpanded === true) return list;
       const expandedList = await list.map(item => {
-        _expansions.map(async (expansion) => {
+        expansions.map(async (expansion) => {
           if(typeof Object.values(expansion)[0] === 'string') {
             await _handleStringExpansion(expansion, item);
           } 
@@ -86,16 +86,16 @@ export const Bucket = () => {
         });
         return item;
       });
-      _cache.populate({ collection: _collection, data: expandedList, locale: _locale });
+      cache.populate({ collection, data: expandedList, locale });
       const filteredList = expandedList.filter(item => {
-        return _filters.every(([field, criteria]) => {
+        return filters.every(([field, criteria]) => {
           const [ condition ] = Object.keys(criteria);
           const [ value ] = Object.values(criteria);
           return Comparison[typof(value)]()[condition](item[field], value);
         });
       });
-      if(_order.length > 0 || filteredList.length > 0) {
-        _order.every(([field, criteria]) => filteredList.sort((a, b) => Sort[criteria](a[field], b[field])));
+      if(order.length > 0 || filteredList.length > 0) {
+        order.every(([field, criteria]) => filteredList.sort((a, b) => Sort[criteria](a[field], b[field])));
       }
       let slicedList;
       if(limit !== undefined) {
@@ -108,12 +108,13 @@ export const Bucket = () => {
       }
       return (slicedList || filteredList);
     }
-    return _cache.get({ collection: _collection, locale: _locale, filters: _filters, order: _order, limit, offset });
+    return cache.get({ collection, locale, filters, order, limit, offset });
   }
-  const _fetchSingle = async () => {
-    if (!_cache.isCached({ single: _single, locale: _locale })) {
-      let data = await _source.get({ locale: _locale, filename: _single });
-      await _expansions.map(async (expansion) => {
+  const _fetchSingle = async (params) => {
+    const { cache, source, single, locale, expansions } = params;
+    if (!cache.isCached({ single, locale })) {
+      let data = await source.get({ locale, filename: single });
+      await expansions.map(async (expansion) => {
         if(typeof Object.values(expansion)[0] === 'string') {
           await _handleStringExpansion(expansion, data);
         } 
@@ -124,9 +125,9 @@ export const Bucket = () => {
           throw new Error('YAML formatting error in expanding properties.');
         }
       })
-      return _cache.populate({ single: _single, data, locale: _locale });
+      return cache.populate({ single, data, locale });
     }
-    return _cache.get({ single: _single, locale: _locale });
+    return cache.get({ single, locale });
   }
   const _handleStringExpansion = async (expansion, data) => {
     const toReplace = await data[Object.keys(expansion)[0]];
