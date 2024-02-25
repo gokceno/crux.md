@@ -28,7 +28,8 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     db.exec(`CREATE TABLE IF NOT EXISTS manifest (id INTEGER PRIMARY KEY, body JSON, _cached_at TEXT)`);
   }
   const _flush = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DELETE FROM ${collection}`));
-  // const _reset = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DROP TABLE IF EXISTS ${collection}`));
+  // eslint-disable-next-line no-unused-vars
+  const _reset = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DROP TABLE IF EXISTS ${collection}`));
   const _isManifestCached = () => !!db.prepare(`SELECT COUNT(1) as count FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.count;
   const _isCollectionCached = ({ collection, locale }) => !!db.prepare(`SELECT COUNT(1) as count FROM collections c WHERE DATETIME(c._cached_at, ?) >= DATETIME() AND c.collection_type = ? AND (c.locale IS NULLIF(?, 'NULL') OR c.locale = ?)`).get([expires, collection, locale])?.count;
   const _isSingleCached = ({ single, locale }) => !!db.prepare(`SELECT COUNT(1) as count FROM singles s WHERE DATETIME(s._cached_at, ?) >= DATETIME() AND s.single_type = ? AND (s.locale IS NULLIF(?, 'NULL') OR s.locale = ?)`).get([expires, single, locale])?.count;
@@ -57,7 +58,9 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
       LIMIT ? OFFSET ?
       `)
     .all([locale, locale, collection, limit, offset]);
-    collections.map(collection => list.push(JSON.parse(`{${collection.properties}}`)));
+    if(collection.properties !== undefined) {
+      collections.map(collection => list.push(JSON.parse(`{${collection.properties}}`)));
+    }
     return list;
   }
   const _getSingle = ({ single, locale }) => {

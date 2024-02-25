@@ -8,6 +8,7 @@ export const Resolvers = ({ bucket }) => {
     const [ expansions ] = manifest.collections
       .filter(item => Object.keys(item) == collection)
       .map(item => {
+        // eslint-disable-next-line no-unused-vars
         return Object.entries(Object.values(item)[0]).filter(([name, type]) => {
           if(typeof type === 'object') {
             return Object.values(type).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
@@ -21,7 +22,7 @@ export const Resolvers = ({ bucket }) => {
       .filter({ filters })
       .order({ order });
     expansions.every(expand => bucket.expand({ [expand[0]]: expand[1] }));
-    return bucket.fetch(limit);
+    return bucket.fetch({ manifest, limit });
   }
   const single = async (single) => {
     if(bucket == undefined) throw new Error('Bucket must be defined');
@@ -29,6 +30,7 @@ export const Resolvers = ({ bucket }) => {
     const [ expansions ] = manifest.singles
       .filter(item => Object.keys(item) == single)
       .map(item => {
+        // eslint-disable-next-line no-unused-vars
         return Object.entries(Object.values(item)[0]).filter(([name, type]) => {
           if(typeof type === 'object') {
             return Object.values(type).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
@@ -39,7 +41,7 @@ export const Resolvers = ({ bucket }) => {
     });
     bucket.select({ single });
     expansions.every(expand => bucket.expand({ [expand[0]]: expand[1] }));
-    return bucket.fetch();
+    return bucket.fetch({ manifest });
   }
   return { 
     collection,

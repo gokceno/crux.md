@@ -12,6 +12,7 @@ export const Bucket = () => {
   let _filters = [];
   let _order = [];
   let _expansions = [];
+  let _depth = {};
   function select({ collection, single }) {
     // TODO: Check if directories are readable 
     if(collection == undefined && single == undefined) 
@@ -56,7 +57,7 @@ export const Bucket = () => {
   }
   const fetch = async (params) => {
     if(_collection !== undefined) return _fetchCollection({ cache: _cache, source: _source, collection: _collection, order: _order, locale: _locale, filters: _filters, expansions: _expansions, ...params });
-    if(_single !== undefined) return _fetchSingle({ cache: _cache, source: _source, single: _single, expansions: _expansions });
+    if(_single !== undefined) return _fetchSingle({ cache: _cache, source: _source, single: _single, expansions: _expansions, ...params });
     throw new Error('Select failed.');
   }
   const manifest = async() => {
@@ -68,17 +69,17 @@ export const Bucket = () => {
     return _cache.get({ isManifest: true });
   }
   const _fetchCollection = async(params = {}) => {
-    const { cache, source, collection, locale, filters, order, expansions, limit, offset = 0 } = params;
+    const { manifest, cache, source, collection, locale, filters = [], order = [], expansions = [], limit, offset = 0 } = params;
     if(!cache.isCached({ collection, locale}) || limit === 1) {
       const list = await source.list({ locale, collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
       if(source.isFiltered === true && source.isOrdered === true && source.isExpanded === true) return list;
       const expandedList = await list.map(item => {
         expansions.map(async (expansion) => {
           if(typeof Object.values(expansion)[0] === 'string') {
-            await _handleStringExpansion(expansion, item);
+            await _handleStringExpansion(expansion, item, manifest, cache);
           } 
           else if (typeof Object.values(expansion)[0] === 'object') {
-            await _handleObjectExpansion(expansion, item);
+            await _handleObjectExpansion(expansion, item, manifest, cache);
           } 
           else {
             throw new Error('YAML formatting error in expanding properties.');
@@ -111,15 +112,15 @@ export const Bucket = () => {
     return cache.get({ collection, locale, filters, order, limit, offset });
   }
   const _fetchSingle = async (params) => {
-    const { cache, source, single, locale, expansions } = params;
+    const { manifest, cache, source, single, locale, expansions } = params;
     if (!cache.isCached({ single, locale })) {
       let data = await source.get({ locale, filename: single });
       await expansions.map(async (expansion) => {
         if(typeof Object.values(expansion)[0] === 'string') {
-          await _handleStringExpansion(expansion, data);
+          await _handleStringExpansion(expansion, data, manifest, cache);
         } 
         else if (typeof Object.values(expansion)[0] === 'object') {
-          await _handleObjectExpansion(expansion, data);
+          await _handleObjectExpansion(expansion, data, manifest, cache);
         } 
         else {
           throw new Error('YAML formatting error in expanding properties.');
@@ -129,56 +130,53 @@ export const Bucket = () => {
     }
     return cache.get({ single, locale });
   }
-  const _handleStringExpansion = async (expansion, data) => {
+  const _findExpansionsByCollection = ({ expansion, manifest, collection}) => {
+    const [ expansions ] = manifest.collections
+    .filter(item => Object.keys(item) == collection)
+    .map(item => {
+        // eslint-disable-next-line no-unused-vars
+      return Object.entries(Object.values(item)[0]).filter(([name, type]) => {
+        if(typeof type === 'object') {
+          return Object.values(type).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
+        }
+        return typeof type === 'string' && type.includes('/')
+      })
+    });
+    // TODO: Use _depth locally;
+    if(_depth[Object.keys(expansion)[0]] == undefined) _depth[Object.keys(expansion)[0]] = 0;
+    if(expansions !== undefined && (_depth[Object.keys(expansion)[0]] || 0) < 2) {
+      return expansions.map(expand => {
+        _depth[Object.keys(expansion)[0]]++;
+        return { [expand[0]]: expand[1] };
+      });
+    }
+    return [];
+  }
+  const _handleStringExpansion = async (expansion, data, manifest, cache) => {
     const toReplace = await data[Object.keys(expansion)[0]];
     data[Object.keys(expansion)[0]] = async () => {
       const [collection, propName] = Object.values(expansion)[0].split('/');
-      const list = (await _source.list({ locale: _locale, collection })).filter(item => (toReplace || []).includes(item[propName]));
-      const expandedList = await list.map(item => {
-        _expansions.map(async (expansion) => {
-          if(typeof Object.values(expansion)[0] === 'string') {
-            await _handleStringExpansion(expansion, item);
-          } 
-          else if (typeof Object.values(expansion)[0] === 'object') {
-            await _handleObjectExpansion(expansion, item);
-          } 
-          else {
-            throw new Error('YAML formatting error in expanding properties.');
-          }
-        });
-        return item;
-      });
-      return expandedList;
+      const expansions = _findExpansionsByCollection({ expansion, collection, manifest });
+      // TODO: Should read from local variables.
+      return (await _fetchCollection({ manifest, expansions, collection, locale: _locale, cache, source: _source })).filter(item => (toReplace || []).includes(item[propName]));
     }
   }
-  const _handleObjectExpansion = async (expansion, data) => {
+  const _handleObjectExpansion = async (expansion, data, manifest, cache) => {
+    // TODO: Should read from local variables.
     const toReplace = await data[Object.keys(expansion)[0]];
     await Object.entries(expansion).map(async ([componentName, componentItems]) => {
       await Object.entries(componentItems)
+      // eslint-disable-next-line no-unused-vars
       .filter(([componentItemName, componentItemType]) => typeof componentItemType === 'string' && componentItemType.includes('/'))
       .map(async ([componentItemName, componentItemType]) => {
         if (data[componentName] !== undefined) {
           const toReplaceValue = await toReplace[componentItemName];
           const [collection, propName] = componentItemType.split('/');
           data[componentName][componentItemName] = await (async () => {
-            const list = await _source.list({ locale: _locale, collection });
-            const filteredList = list.filter(item => (toReplaceValue || []).includes(item[propName]));
-            const expandedList = await filteredList.map(item => {
-              _expansions.map(async (expansion) => {
-                if(typeof Object.values(expansion)[0] === 'string') {
-                  await _handleStringExpansion(expansion, item);
-                } 
-                else if (typeof Object.values(expansion)[0] === 'object') {
-                  await _handleObjectExpansion(expansion, item);
-                } 
-                else {
-                  throw new Error('YAML formatting error in expanding properties.');
-                }
-              });
-              return item;
-            });
-            return expandedList;
-          }); // ();
+            const expansions = _findExpansionsByCollection({ expansion, collection, manifest });
+            const list = (await _fetchCollection({ manifest, expansions, collection, locale: _locale, cache, source: _source }));
+            return list.filter(item => (toReplaceValue || []).includes(item[propName]));
+          });
         }
       })
     })
