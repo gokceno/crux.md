@@ -81,6 +81,7 @@ const mapGraphQLTypes = (type, name, nodes, depth = 0, prefix) => {
     }
   }
   else if(typeof type === 'string' && type.includes('/')) {
+    // eslint-disable-next-line no-unused-vars
     const [targetNodeName, targetNodeVia] = type.split('/');
     const targetNode = nodes.filter(leaf => Object.keys(leaf)[0] == targetNodeName);
     if (targetNode === undefined) throw new Error('Target node cannot be mapped to a GraphQL type.');
@@ -114,6 +115,7 @@ const mapFields = (node, nodes, depth = 0, prefix) => {
   .map(([name, type]) => {
     if(typeof type === 'string' && type.includes('/')) {
       if(depth < 2 && nodes !== undefined) {
+        // eslint-disable-next-line no-unused-vars
         const [targetNodeName, targetNodeVia] = type.split('/');
         const targetNode = nodes.filter(leaf => Object.keys(leaf)[0] == targetNodeName);
         leafObj[name] = {
