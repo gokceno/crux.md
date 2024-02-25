@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api-resolvers
 
+## 1.0.2
+
+### Patch Changes
+
+- 73df7ee: Fixed an issue preventing "singles" drawing expansions in sub-components.
+
 ## 1.0.1
 
 ### Patch Changes

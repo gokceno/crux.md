@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.1.1
+
+### Patch Changes
+
+- 73df7ee: Fixed an issue preventing "singles" drawing expansions in sub-components.
+
 ## 1.1.0
 
 ### Minor Changes

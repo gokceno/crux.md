@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.2
+
+### Patch Changes
+
+- 73df7ee: Fixed an issue preventing "singles" drawing expansions in sub-components.
+
 ## 0.3.1
 
 ### Patch Changes
