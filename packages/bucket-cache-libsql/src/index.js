@@ -102,6 +102,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     });
     return data;
   }
+  
   const _cacheSingle = ({ single, data, locale }) => {
     _flush(['singles', 'singles_props']);
     const row = db.prepare(`INSERT INTO singles (single_type, locale, _cached_at) VALUES (?, ?, DATETIME())`).run([single, locale]);
@@ -138,11 +139,11 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
         if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS NOT ${compareWith}`);
         return statement;
       },
-      _null: (manifestDataType, compareWith) => {
+      _null: () => {
         statement.push(`COALESCE(JSON_EXTRACT(cp.prop_value, '$'), '') = ''`);
         return statement;
       },
-      _nnull: (manifestDataType, compareWith) => {
+      _nnull: () => {
         statement.push(`COALESCE(JSON_EXTRACT(cp.prop_value, '$'), '') != ''`);
         return statement;
       },
