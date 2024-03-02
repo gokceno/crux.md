@@ -27,9 +27,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     db.exec(`CREATE TABLE IF NOT EXISTS collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON)`);
     db.exec(`CREATE TABLE IF NOT EXISTS manifest (id INTEGER PRIMARY KEY, body JSON, _cached_at TEXT)`);
   }
-  const _flush = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DELETE FROM ${collection}`));
-  // eslint-disable-next-line no-unused-vars
-  const _reset = () => ['singles', 'singles_props', 'collections', 'collections_props', 'manifest'].map(collection => db.exec(`DROP TABLE IF EXISTS ${collection}`));
+  const _flush = (tables = []) => tables.map(table => db.exec(`DELETE FROM ${table}`));
   const _isManifestCached = () => !!db.prepare(`SELECT COUNT(1) as count FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.count;
   const _isCollectionCached = ({ collection, locale }) => !!db.prepare(`SELECT COUNT(1) as count FROM collections c WHERE DATETIME(c._cached_at, ?) >= DATETIME() AND c.collection_type = ? AND (c.locale IS NULLIF(?, 'NULL') OR c.locale = ?)`).get([expires, collection, locale])?.count;
   const _isSingleCached = ({ single, locale }) => !!db.prepare(`SELECT COUNT(1) as count FROM singles s WHERE DATETIME(s._cached_at, ?) >= DATETIME() AND s.single_type = ? AND (s.locale IS NULLIF(?, 'NULL') OR s.locale = ?)`).get([expires, single, locale])?.count;
@@ -79,10 +77,9 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     .get([single, locale]);
     return JSON.parse(`{${row.properties}}`);
   }
-  const _getManifest = () => JSON.parse(db.prepare(`SELECT m.body FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.body || '{}');  
-
+  const _getManifest = () => JSON.parse(db.prepare(`SELECT m.body FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.body || '{}');
   const _cacheCollection = ({ collection, data, locale }) => {
-    _flush();
+    _flush(['collections', 'collections_props']);
     data.map(async item => {
       const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection,item._id, locale]);
       const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
@@ -105,32 +102,8 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     });
     return data;
   }
-  /*
   const _cacheSingle = ({ single, data, locale }) => {
-    _flush();
-    const row = db.prepare(`INSERT INTO singles (single_type, locale, _cached_at) VALUES (?, ?, DATETIME())`).run([single, locale]);
-    const statement = db.prepare(`INSERT INTO singles_props (single_id, prop_name, prop_value) VALUES (?, ?, ?)`);
-    Object.keys(data).map(async (prop) => {
-      if (typeof data[prop] === 'function' && data[prop].constructor.name === 'AsyncFunction') {
-        const expandableData = await data[prop]();
-        const expandedData = await Promise.all(expandableData.map(async (expand) => {
-          let returnObject = {};
-          await Promise.all(Object.entries(expand).map(async ([propName, propValue]) =>
-            returnObject[propName] = typeof propValue === 'function' ? await propValue() : propValue
-          ));
-          return returnObject;
-        }));
-        statement.run([row.lastInsertRowid, prop, JSON.stringify(expandedData)]);
-      }
-      else {
-        statement.run([row.lastInsertRowid, prop, JSON.stringify(await data[prop])]);
-      }
-    });
-    return data;
-  }
-  */
-  const _cacheSingle = ({ single, data, locale }) => {
-    _flush();
+    _flush(['singles', 'singles_props']);
     const row = db.prepare(`INSERT INTO singles (single_type, locale, _cached_at) VALUES (?, ?, DATETIME())`).run([single, locale]);
     const statement = db.prepare(`INSERT INTO singles_props (single_id, prop_name, prop_value) VALUES (?, ?, ?)`);
     Object.keys(data).map(async (prop) => {
@@ -144,7 +117,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     return data;
   }
   const _cacheManifest = ({ data }) => {
-    // TODO: No garbage collection is made
+    _flush(['manifest']);
     if(data !== undefined && typeof(data) === 'object') {
       db.prepare(`INSERT INTO manifest (body, _cached_at) VALUES (?, DATETIME())`).run(JSON.stringify(data));
     }

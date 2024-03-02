@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.1.2
+
+### Patch Changes
+
+- Fixed an issue with maximum depth settings.
+
 ## 1.1.1
 
 ### Patch Changes

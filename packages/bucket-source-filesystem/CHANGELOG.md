@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.0.5
+
+### Patch Changes
+
+- Fixed \_body returning null values.
+
 ## 0.0.4
 
 ### Patch Changes

@@ -134,7 +134,7 @@ export const Bucket = () => {
     const [ expansions ] = manifest.collections
     .filter(item => Object.keys(item) == collection)
     .map(item => {
-        // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
       return Object.entries(Object.values(item)[0]).filter(([name, type]) => {
         if(typeof type === 'object') {
           return Object.values(type).filter(prop => typeof prop === 'string' && prop.includes('/')).length;
@@ -143,8 +143,9 @@ export const Bucket = () => {
       })
     });
     // TODO: Use _depth locally;
+    // TODO: Depth calculates number of fields (records) fetched, not the depth.
     if(_depth[Object.keys(expansion)[0]] == undefined) _depth[Object.keys(expansion)[0]] = 0;
-    if(expansions !== undefined && (_depth[Object.keys(expansion)[0]] || 0) < 2) {
+    if(expansions !== undefined && (_depth[Object.keys(expansion)[0]] || 0) < 8) {
       return expansions.map(expand => {
         _depth[Object.keys(expansion)[0]]++;
         return { [expand[0]]: expand[1] };

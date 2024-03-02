@@ -51,7 +51,7 @@ export const FileSystem = ({ bucketPath }) => {
   const _extractBody = (file) => {
     const body = file.split('---')[2];
     if(body === undefined) throw new Error('Can not extract body, file may be formatted incorrectly.');
-    return { body };
+    return { _body: body };
   }
   const _extractFrontMatter = (file) => {
     // via and thanks to: https://github.com/jxson/front-matter/blob/master/index.js
