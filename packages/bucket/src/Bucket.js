@@ -125,7 +125,7 @@ export const Bucket = () => {
         else {
           throw new Error('YAML formatting error in expanding properties.');
         }
-      })
+      });
       return cache.populate({ single, data, locale });
     }
     return cache.get({ single, locale });
@@ -142,7 +142,7 @@ export const Bucket = () => {
         return typeof type === 'string' && type.includes('/')
       })
     });
-    // TODO: Use _depth locally;
+    // TODO: Use _depth locally or through an action.
     // TODO: Depth calculates number of fields (records) fetched, not the depth.
     if(_depth[Object.keys(expansion)[0]] == undefined) _depth[Object.keys(expansion)[0]] = 0;
     if(expansions !== undefined && (_depth[Object.keys(expansion)[0]] || 0) < 8) {
@@ -158,8 +158,9 @@ export const Bucket = () => {
     data[Object.keys(expansion)[0]] = async () => {
       const [collection, propName] = Object.values(expansion)[0].split('/');
       const expansions = _findExpansionsByCollection({ expansion, collection, manifest });
-      // TODO: Should read from local variables.
-      return (await _fetchCollection({ manifest, expansions, collection, locale: _locale, cache, source: _source })).filter(item => (toReplace || []).includes(item[propName]));
+      // TODO: Should read "locale" and "cache" from local variables.
+      const list = await _fetchCollection({ manifest, expansions, collection, locale: _locale, cache, source: _source });
+      return list.filter(item => (toReplace || []).includes(item[propName]));
     }
   }
   const _handleObjectExpansion = async (expansion, data, manifest, cache) => {
@@ -175,7 +176,7 @@ export const Bucket = () => {
           const [collection, propName] = componentItemType.split('/');
           data[componentName][componentItemName] = await (async () => {
             const expansions = _findExpansionsByCollection({ expansion, collection, manifest });
-            const list = (await _fetchCollection({ manifest, expansions, collection, locale: _locale, cache, source: _source }));
+            const list = await _fetchCollection({ manifest, expansions, collection, locale: _locale, cache, source: _source });
             return list.filter(item => (toReplaceValue || []).includes(item[propName]));
           });
         }
