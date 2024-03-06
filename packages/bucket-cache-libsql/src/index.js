@@ -89,7 +89,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
           const expandedData = await Promise.all(data.map(async (expand) => {
             let returnObject = {};
             await Promise.all(Object.entries(expand).map(async ([propName, propValue]) =>
-              returnObject[propName] = typeof propValue === 'function' ? await propValue() : propValue
+              returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
             ));
             return returnObject;
           }));
@@ -106,6 +106,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     _flush(['singles', 'singles_props']);
     const row = db.prepare(`INSERT INTO singles (single_type, locale, _cached_at) VALUES (?, ?, DATETIME())`).run([single, locale]);
     const statement = db.prepare(`INSERT INTO singles_props (single_id, prop_name, prop_value) VALUES (?, ?, ?)`);
+
     Object.keys(data).map(async (prop) => {
       if (typeof data[prop] === 'function' && data[prop].constructor.name === 'AsyncFunction') {
         const expandableData = await data[prop]();
@@ -117,6 +118,13 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
           return returnObject;
         }));
         statement.run([row.lastInsertRowid, prop, JSON.stringify(expandedData)]);
+      }
+      else if(typeof data[prop] === 'object') {
+        let returnObject = {};
+        await Promise.all(Object.entries(data[prop]).map(async ([propName, propValue]) => {
+          returnObject[propName] = typeof propValue === 'function' ? (await propValue()) : propValue
+        }));
+        statement.run([row.lastInsertRowid, prop, JSON.stringify(returnObject)]);
       }
       else {
         statement.run([row.lastInsertRowid, prop, JSON.stringify(data[prop])]);

@@ -114,18 +114,18 @@ export const Bucket = () => {
   const _fetchSingle = async (params) => {
     const { manifest, cache, source, single, locale, expansions } = params;
     if (!cache.isCached({ single, locale })) {
-      let data = await source.get({ locale, filename: single });
-      await expansions.map(async (expansion) => {
+      let sourceData = await source.get({ locale, filename: single });
+      const [ data ] = await Promise.all(expansions.map(async (expansion) => { // FIXME: What if more than one expansion??
         if(typeof Object.values(expansion)[0] === 'string') {
-          await _handleStringExpansion(expansion, data, manifest, cache);
+          return await _handleStringExpansion(expansion, sourceData, manifest, cache);
         } 
         else if (typeof Object.values(expansion)[0] === 'object') {
-          await _handleObjectExpansion(expansion, data, manifest, cache);
+          return await _handleObjectExpansion(expansion, sourceData, manifest, cache);
         } 
         else {
           throw new Error('YAML formatting error in expanding properties.');
         }
-      });
+      }));
       return cache.populate({ single, data, locale });
     }
     return cache.get({ single, locale });
@@ -181,7 +181,8 @@ export const Bucket = () => {
           });
         }
       })
-    })
+    });
+    return data;
   }
   return {
     manifest,
