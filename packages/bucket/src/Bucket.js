@@ -171,7 +171,7 @@ export const Bucket = () => {
       // eslint-disable-next-line no-unused-vars
       .filter(([componentItemName, componentItemType]) => typeof componentItemType === 'string' && componentItemType.includes('/'))
       .map(async ([componentItemName, componentItemType]) => {
-        if (data[componentName] !== undefined) {
+        if(data[componentName] !== undefined) {
           const toReplaceValue = await toReplace[componentItemName];
           const [collection, propName] = componentItemType.split('/');
           data[componentName][componentItemName] = await (async () => {

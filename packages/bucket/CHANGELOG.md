@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.1.3
+
+### Patch Changes
+
+- Fixed issues with caching of singles and their props.
+
 ## 1.1.2
 
 ### Patch Changes
