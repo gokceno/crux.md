@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.6
+
+### Patch Changes
+
+- Fixed an issue causing nested objects not being output and cached correctly.
+
 ## 0.3.5
 
 ### Patch Changes

@@ -126,7 +126,7 @@ export const Bucket = () => {
           throw new Error('YAML formatting error in expanding properties.');
         }
       }));
-      return cache.populate({ single, data, locale });
+      return cache.populate({ single, data: (data ?? sourceData), locale });
     }
     return cache.get({ single, locale });
   }
