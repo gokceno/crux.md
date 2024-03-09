@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.5
+
+### Patch Changes
+
+- Removed dependency for the manifest.
+
 ## 0.3.4
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 import Database from 'libsql';
 
-export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }) => {
+export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
   const db = new Database(dbPath);
   const populate = ({ isManifest, collection, single, data, locale }) => {
     if(isManifest === true) return _cacheManifest({ data });

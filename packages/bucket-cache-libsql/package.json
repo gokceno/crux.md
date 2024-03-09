@@ -1,7 +1,7 @@
 {
   "name": "@gokceno/crux-bucket-cache-libsql",
   "repository": "git+https://github.com/gokceno/crux.md.git",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "main": "./src/index.js",
   "type": "module",
   "publishConfig": {

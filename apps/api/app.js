@@ -46,14 +46,15 @@ app.all('/graphql', async (req, res) => {
       basePath: 'apps/api/.bucket',
       auth: process.env.GITHUB_TOKEN,
     })
-
   });
-  const manifest = await bucket.manifest();
+
   bucket.initCache(BucketCache({
     dbPath: '../../samples/bucket/.cache.sqlite', // Use :memory: only if defined global otherwise it's useless as it recreates cache on every request.
     expires: '600 SECONDS',
-    manifest,
   }));
+
+  const manifest = await bucket.manifest();
+
   const handler = createHandler({ 
     schema: schema({ bucket, manifest }),
   });
