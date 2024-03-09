@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.4
+
+### Patch Changes
+
+- Fixed issues with caching of singles and their props.
+
 ## 0.3.3
 
 ### Patch Changes
