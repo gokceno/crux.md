@@ -38,42 +38,45 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
     const collections = db
     .prepare(`
       SELECT
-      c.id AS collection_id, 
-      GROUP_CONCAT('"' || cp.prop_name || '":' || cp.prop_value) AS properties
-      FROM collections c
-      LEFT JOIN collections_props cp ON c.id = cp.collection_id
+        c.id AS collection_id, 
+        GROUP_CONCAT('"' || cp.prop_name || '":' || cp.prop_value) AS properties
+      FROM 
+        collections c
+      LEFT JOIN 
+        collections_props cp ON c.id = cp.collection_id
       WHERE 
-      DATETIME(c._cached_at, '+${expires}') >= DATETIME()
-      AND (c.locale IS NULLIF(?, 'NULL') OR c.locale = ?)
+        DATETIME(c._cached_at, '+${expires}') >= DATETIME()
+        AND (c.locale IS NULLIF(?, 'NULL') OR c.locale = ?)
       GROUP BY
-      c.id
+        c.id
       HAVING 
-      ${filters.map(([propName, propComparison]) => `MAX(CASE WHEN cp.prop_name = '${propName}' AND ${_constructWhere({ collection, propName, propComparison })} THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
-      c.collection_type = ?
+        ${filters.map(([propName, propComparison]) => `MAX(CASE WHEN cp.prop_name = '${propName}' AND ${_constructWhere({ collection, propName, propComparison })} THEN 1 ELSE 0 END) = 1 AND`).join(' ')}
+        c.collection_type = ?
       ORDER BY
-      ${order.map(o => `MAX(CASE WHEN cp.prop_name = '${o[0]}' THEN cp.prop_value ELSE NULL END) COLLATE NOCASE ${o[1]},`).join(' ')}
-      MAX(cp.prop_value) ASC
+        ${order.map(o => `MAX(CASE WHEN cp.prop_name = '${o[0]}' THEN cp.prop_value ELSE NULL END) COLLATE NOCASE ${o[1]},`).join(' ')}
+        MAX(cp.prop_value) ASC
       LIMIT ? OFFSET ?
-      `)
+    `)
     .all([locale, locale, collection, limit, offset]);
-    if(collection.properties !== undefined) {
-      collections.map(collection => list.push(JSON.parse(`{${collection.properties}}`)));
-    }
+    collections
+      .filter(collection => collection.properties !== null) // FIXME: What id the record has no properties? It'd be filtered all together.
+      .map(collection => list.push(JSON.parse(`{${collection.properties}}`)));
     return list;
   }
   const _getSingle = ({ single, locale }) => {
     const row = db
     .prepare(`
       SELECT
-      s.id AS single_id, 
-      GROUP_CONCAT('"' || sp.prop_name || '":' || sp.prop_value) AS properties
-      FROM singles s
+        s.id AS single_id, 
+        GROUP_CONCAT('"' || sp.prop_name || '":' || sp.prop_value) AS properties
+      FROM 
+        singles s
       LEFT JOIN singles_props sp ON s.id = sp.single_id
       WHERE 
-      s.single_type = ?
-      AND (s.locale IS NULLIF(?, 'NULL') OR s.locale = ?)
-      AND DATETIME(s._cached_at, '+${expires}') >= DATETIME()
-      `)
+        s.single_type = ?
+        AND (s.locale IS NULLIF(?, 'NULL') OR s.locale = ?)
+        AND DATETIME(s._cached_at, '+${expires}') >= DATETIME()
+    `)
     .get([single, locale]);
     return JSON.parse(`{${row.properties}}`);
   }
@@ -81,22 +84,21 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
   const _cacheCollection = ({ collection, data, locale }) => {
     _flush(['collections', 'collections_props']);
     data.map(async item => {
-      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection,item._id, locale]);
+      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection, item._id, locale]);
       const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
-      Object.keys(item).map(async (prop) => {
-        if (typeof item[prop] === 'function' && item[prop].constructor.name === 'AsyncFunction') {
-          const data = await item[prop]();
-          const expandedData = await Promise.all(data.map(async (expand) => {
+      Object.entries(item).map(async ([propName, propValue]) => {
+        if(typeof propValue === 'function' && propValue.constructor.name === 'AsyncFunction') {
+          const expandedData = await Promise.all((await (await propValue)()).map(async (expand) => {
             let returnObject = {};
-            await Promise.all(Object.entries(expand).map(async ([propName, propValue]) =>
+            Object.entries(expand).map(async ([propName, propValue]) =>
               returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
-            ));
+            );
             return returnObject;
-          }));
-          statement.run([row.lastInsertRowid, prop, JSON.stringify(expandedData)]);
+          }));        
+          statement.run([row.lastInsertRowid, propName, JSON.stringify(expandedData)]);
         }
         else {
-          statement.run([row.lastInsertRowid, prop, JSON.stringify(await item[prop])]);
+          statement.run([row.lastInsertRowid, propName, JSON.stringify(propValue)]);
         }
       });
     });
@@ -111,8 +113,13 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS', manifest }
         const expandableData = await data[prop]();
         const expandedData = await Promise.all(expandableData.map(async (expand) => {
           let returnObject = {};
-          await Promise.all(Object.entries(expand).map(async ([propName, propValue]) => {
+          await Promise.all(Object.entries(data[prop]).map(async ([propName, propValue]) => {
             returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
+            Object.keys(returnObject[propName]).map(k => {
+              if(typeof returnObject[propName][k] === 'object') {
+                returnObject[propName][k]['children'] = [{title: "xddd"}]; // TODO: Fix me
+              }
+            });
           }));
           return returnObject;
         }));
