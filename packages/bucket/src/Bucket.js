@@ -158,7 +158,7 @@ export const Bucket = () => {
     data[Object.keys(expansion)[0]] = async () => {
       const [collection, propName] = Object.values(expansion)[0].split('/');
       const expansions = _findExpansionsByCollection({ expansion, collection, manifest });
-      // TODO: Should read "locale" and "cache" from local variables.
+      // TODO: Should read "locale" and "source" from local variables.
       const list = await _fetchCollection({ manifest, expansions, collection, locale: _locale, cache, source: _source });
       return list.filter(item => (toReplace || []).includes(item[propName]));
     }
