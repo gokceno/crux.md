@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.7
+
+### Patch Changes
+
+- Fixed an issue which flushes the cache right after caching the value.
+
 ## 0.3.6
 
 ### Patch Changes

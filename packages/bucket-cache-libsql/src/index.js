@@ -22,12 +22,13 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
   }
   const _createCacheTables = () => {
     db.exec(`CREATE TABLE IF NOT EXISTS singles (id INTEGER PRIMARY KEY, single_type TEXT, locale TEXT, _cached_at TEXT)`);
-    db.exec(`CREATE TABLE IF NOT EXISTS singles_props (id INTEGER PRIMARY KEY, single_id INTEGER, prop_name TEXT, prop_value JSON)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS singles_props (id INTEGER PRIMARY KEY, single_id INTEGER, prop_name TEXT, prop_value JSON, FOREIGN KEY (single_id) REFERENCES singles(id) ON DELETE CASCADE)`);
     db.exec(`CREATE TABLE IF NOT EXISTS collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, locale TEXT, _cached_at TEXT)`);
-    db.exec(`CREATE TABLE IF NOT EXISTS collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON, FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE)`);
     db.exec(`CREATE TABLE IF NOT EXISTS manifest (id INTEGER PRIMARY KEY, body JSON, _cached_at TEXT)`);
   }
-  const _flush = (tables = []) => tables.map(table => db.exec(`DELETE FROM ${table}`));
+  // FIXME: locale not implemented
+  const _flush = (tables = []) => tables.map(table => db.exec(`DELETE FROM ${table} WHERE DATETIME(_cached_at, '${expires}') <= DATETIME()`));
   const _isManifestCached = () => !!db.prepare(`SELECT COUNT(1) as count FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.count;
   const _isCollectionCached = ({ collection, locale }) => !!db.prepare(`SELECT COUNT(1) as count FROM collections c WHERE DATETIME(c._cached_at, ?) >= DATETIME() AND c.collection_type = ? AND (c.locale IS NULLIF(?, 'NULL') OR c.locale = ?)`).get([expires, collection, locale])?.count;
   const _isSingleCached = ({ single, locale }) => !!db.prepare(`SELECT COUNT(1) as count FROM singles s WHERE DATETIME(s._cached_at, ?) >= DATETIME() AND s.single_type = ? AND (s.locale IS NULLIF(?, 'NULL') OR s.locale = ?)`).get([expires, single, locale])?.count;
@@ -82,7 +83,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
   }
   const _getManifest = () => JSON.parse(db.prepare(`SELECT m.body FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.body || '{}');
   const _cacheCollection = ({ collection, data, locale }) => {
-    _flush(['collections', 'collections_props']);
+    _flush(['collections']);
     data.map(async item => {
       const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection, item._id, locale]);
       const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
@@ -94,7 +95,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
               returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
             );
             return returnObject;
-          }));        
+          }));
           statement.run([row.lastInsertRowid, propName, JSON.stringify(expandedData)]);
         }
         else {
@@ -105,7 +106,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     return data;
   }
   const _cacheSingle = ({ single, data, locale }) => {
-    _flush(['singles', 'singles_props']);
+    _flush(['singles']);
     const row = db.prepare(`INSERT INTO singles (single_type, locale, _cached_at) VALUES (?, ?, DATETIME())`).run([single, locale]);
     const statement = db.prepare(`INSERT INTO singles_props (single_id, prop_name, prop_value) VALUES (?, ?, ?)`);
     Object.entries(data).map(async ([propName, propValue]) => {
