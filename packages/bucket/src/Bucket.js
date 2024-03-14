@@ -56,7 +56,7 @@ export const Bucket = () => {
     return this;
   }
   const fetch = async (params) => {
-    if(_collection !== undefined) return _fetchCollection({ cache: _cache, source: _source, collection: _collection, order: _order, locale: _locale, filters: _filters, expansions: _expansions, ...params });
+    if(_collection !== undefined) return _fetchCollection({ cache: _cache, source: _source, collection: _collection, order: _order, locale: _locale, filters: _filters, expansions: _expansions, manifest: params.manifest, ...params.limit });
     if(_single !== undefined) return _fetchSingle({ cache: _cache, source: _source, single: _single, expansions: _expansions, ...params });
     throw new Error('Select failed.');
   }
@@ -69,7 +69,7 @@ export const Bucket = () => {
     return _cache.get({ isManifest: true });
   }
   const _fetchCollection = async(params = {}) => {
-    const { manifest, cache, source, collection, locale, filters = [], order = [], expansions = [], limit, offset = 0 } = params;
+    const { manifest, cache, source, collection, locale, filters = [], order = [], expansions = [], limit, offset } = params;
     if(!cache.isCached({ collection, locale}) || limit === 1) {
       const list = await source.list({ locale, collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
       if(source.isFiltered === true && source.isOrdered === true && source.isExpanded === true) return list;

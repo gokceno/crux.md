@@ -1,7 +1,7 @@
 {
   "name": "@gokceno/crux-bucket",
   "repository": "git+https://github.com/gokceno/crux.md.git",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "main": "./src/Bucket.js",
   "type": "module",
   "publishConfig": {

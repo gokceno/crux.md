@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.1.5
+
+### Patch Changes
+
+- Fixed an issue with pagination.
+
 ## 1.1.4
 
 ### Patch Changes
