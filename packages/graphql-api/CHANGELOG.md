@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api
 
+## 1.2.0
+
+### Minor Changes
+
+- Added \_id and \_slug to filters and order clauses.
+
 ## 1.1.1
 
 ### Patch Changes

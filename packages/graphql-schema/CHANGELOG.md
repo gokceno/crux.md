@@ -1,5 +1,12 @@
 # @gokceno/crux-graphql-schema
 
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @gokceno/crux-graphql-api@1.2.0
+
 ## 1.0.4
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.0.6
+
+### Patch Changes
+
+- a752d84: Added \_id and \_slug fields to entities, removed \_filename. All new fields slugified.
+
 ## 0.0.5
 
 ### Patch Changes

@@ -152,6 +152,14 @@ const mapFilterArgs = (collectionName, node) => {
     return leafObj;
   });
   if(Object.keys(leafObj).length === 0) return undefined;
+  ['_id', '_slug'].map(field => {
+    leafObj[field] = { 
+      type: new GraphQLInputObjectType({
+        name: `filter_${collectionName}_${field}`, 
+        fields: () => mappings['string']
+      })
+    };
+  });
   return { 
     filters: { 
       type: new GraphQLInputObjectType({
@@ -196,6 +204,17 @@ const mapOrderArgs = (collectionName, node) => {
     }
   })
   if(Object.keys(leafObj).length === 0) return undefined;
+  ['_id', '_slug'].map(field => {
+    leafObj[field] = { 
+      type: new GraphQLEnumType({
+        name: `order_${collectionName}_${field}`,
+        values: {
+          asc: { value: 'asc' },
+          desc: { value: 'desc' },
+        },
+      })
+    }
+  });
   return { 
     order: { 
       type: new GraphQLInputObjectType({
