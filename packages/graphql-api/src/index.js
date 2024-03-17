@@ -110,7 +110,11 @@ const mapField = (node, nodes) => {
 }
 const mapFields = (node, nodes, depth = 0, prefix) => {
   let leafObj = {};
-  if (nodes !== undefined) Object.values(node)[0]['_body'] = 'string';
+  if (nodes !== undefined) {
+    Object.values(node)[0]['_body'] = 'string';
+    Object.values(node)[0]['_id'] = 'string';
+    Object.values(node)[0]['_slug'] = 'string';
+  }
   Object.entries(Object.values(node)[0])
   .map(([name, type]) => {
     if(typeof type === 'string' && type.includes('/')) {
