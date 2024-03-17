@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import YAML from 'yaml';
+import slugify from '@sindresorhus/slugify'
 
 export const FileSystem = ({ bucketPath }) => {
   const _defaultFileExtension = 'md';
@@ -20,14 +21,14 @@ export const FileSystem = ({ bucketPath }) => {
       const filteredFiles = filenames.filter(filename => filename.split('.')[1] === _defaultFileExtension);
       const filePromises = filteredFiles.map(async (filename) => {
         const file = await open({ filename: path.join((locale ?? ''), 'collections', collection, filename) });
+        const frontMatter = _extractFrontMatter(file);
         if(file === undefined) {
           throw new Error('Failed to get file contents or types got mixed up.');
         }
         return {
-          _id: filename,
-          _slug: filename,
-          _filename: filename,
-          ..._extractFrontMatter(file),
+          _id: filename.replace('.' + _defaultFileExtension, ''),
+          _slug: slugify(frontMatter.title || ''),
+          ...frontMatter,
           ...(omitBody === false ? _extractBody(file) : { _body: null }),
         }
       });
@@ -40,11 +41,11 @@ export const FileSystem = ({ bucketPath }) => {
   }
   const get = async({ filename, locale }) => {
     let file = await open({ filename: path.join((locale ?? ''), 'singles', [filename, _defaultFileExtension].join('.')) });
+    const frontMatter = _extractFrontMatter(file);
     return {
-      _id: filename,
-      _slug: filename,
-      _filename: filename,
-      ..._extractFrontMatter(file),
+      _id: slugify(filename.replace('.' + _defaultFileExtension, '')),
+      _slug: slugify(frontMatter.title || ''),
+      ...frontMatter,
       ..._extractBody(file),
     }
   }

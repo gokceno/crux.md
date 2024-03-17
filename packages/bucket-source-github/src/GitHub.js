@@ -1,6 +1,7 @@
 import path from 'path';
 import YAML from 'yaml';
 import { Octokit, RequestError } from "octokit";
+import slugify from '@sindresorhus/slugify'
 
 export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub-Api-Version': '2022-11-28' } }) => {
   const _defaultFileExtension = 'md';
@@ -34,11 +35,11 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
       });
       const promises = response?.data?.filter(d => d.name.split('.')[1] === _defaultFileExtension).map(async (file) => {
         const fileContents = await open({ filename: path.join((locale ?? ''), 'collections', collection, file.name) });
+        const frontMatter = _extractFrontMatter(fileContents);
         return {
-          _id: file.name,
-          _slug: file.name,
-          _filename: file.name,
-          ..._extractFrontMatter(fileContents),
+          _id: file.name.replace('.' + _defaultFileExtension, ''),
+          _slug: slugify(frontMatter.title || ''),
+          ...frontMatter,
           ...(omitBody === false ? _extractBody(fileContents) : { _body: null }),
         }
       });
@@ -54,11 +55,11 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     let finalPath = ['singles', [filename, _defaultFileExtension].join('.')];
     if(locale !== undefined) finalPath.unshift(locale);
     const fileContents = await open({ filename: path.join(...finalPath) });
+    const frontMatter = _extractFrontMatter(fileContents);
     return {
-      _id: filename,
-      _slug: filename,
-      _filename: filename,
-      ..._extractFrontMatter(fileContents),
+      _id: filename.replace('.' + _defaultFileExtension, ''),
+      _slug: slugify(frontMatter.title || ''),
+      ...frontMatter,
       ..._extractBody(fileContents),
     }
   }
