@@ -23,9 +23,9 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     return false;
   }
   const _createCacheTables = () => {
-    db.exec(`CREATE TABLE IF NOT EXISTS singles (id INTEGER PRIMARY KEY, single_type TEXT, locale TEXT, _cached_at TEXT, _cached_at_ms INTEGER)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS singles (id INTEGER PRIMARY KEY, single_type TEXT, locale TEXT, _cached_at TEXT)`);
     db.exec(`CREATE TABLE IF NOT EXISTS singles_props (id INTEGER PRIMARY KEY, single_id INTEGER, prop_name TEXT, prop_value JSON, FOREIGN KEY (single_id) REFERENCES singles(id) ON DELETE CASCADE)`);
-    db.exec(`CREATE TABLE IF NOT EXISTS collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, locale TEXT, _cached_at TEXT, _cached_at_ms INTEGER)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, locale TEXT, _cached_at TEXT)`);
     db.exec(`CREATE TABLE IF NOT EXISTS collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON, FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE)`);
     db.exec(`CREATE TABLE IF NOT EXISTS manifest (id INTEGER PRIMARY KEY, body JSON, _cached_at TEXT)`);
   }
@@ -85,22 +85,9 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
   }
   const _getManifest = () => JSON.parse(db.prepare(`SELECT m.body FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.body || '{}');
   const _cacheCollection = ({ collection, data, locale }) => {
-    // Flush old records - Leave only the newest records, with latest _cached_at
-    db.exec(`
-      DELETE FROM collections 
-      WHERE collection_type = '${collection}' 
-      AND id NOT IN (
-        SELECT id FROM collections 
-        WHERE collection_type = '${collection}'
-        AND _cached_at_ms NOT IN (
-          SELECT MAX(_cached_at_ms) from collections WHERE collection_type = '${collection}'
-        )
-        ORDER BY _cached_at_ms DESC
-        LIMIT 1
-      )
-    `); 
+    _flush(['collections']);
     data.map(async item => {
-      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at, _cached_at_ms) VALUES (?, ?, ?, DATETIME(), CAST((JULIANDAY('now') - 2440587.5) * 86400 * 1000 AS INTEGER))`).run([collection, item._id, locale]);
+      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection, item._id, locale]);
       const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
       Object.entries(item).map(async ([propName, propValue]) => {
         if(typeof propValue === 'function' && propValue.constructor.name === 'AsyncFunction') {
@@ -122,7 +109,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
   }
   const _cacheSingle = ({ single, data, locale }) => {
     _flush(['singles']);
-    const row = db.prepare(`INSERT INTO singles (single_type, locale, _cached_at, _cached_at_ms) VALUES (?, ?, DATETIME(), CAST((JULIANDAY('now') - 2440587.5) * 86400 * 1000 AS INTEGER))`).run([single, locale]);
+    const row = db.prepare(`INSERT INTO singles (single_type, locale, _cached_at) VALUES (?, ?, DATETIME())`).run([single, locale]);
     const statement = db.prepare(`INSERT INTO singles_props (single_id, prop_name, prop_value) VALUES (?, ?, ?)`);
     Object.entries(data).map(async ([propName, propValue]) => {
       if(typeof propValue === 'function' && propValue.constructor.name === 'AsyncFunction') {

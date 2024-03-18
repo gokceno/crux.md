@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.9
+
+### Patch Changes
+
+- Rolled back changes.
+
 ## 0.3.8
 
 ### Patch Changes
