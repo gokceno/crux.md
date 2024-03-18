@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.1.6
+
+### Patch Changes
+
+- Fixed an issue causing filters returning null results from cached items.
+
 ## 1.1.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.8
+
+### Patch Changes
+
+- Fixed an issue causing filters returning null results from cached items.
+
 ## 0.3.7
 
 ### Patch Changes
