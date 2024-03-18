@@ -2,6 +2,8 @@ import Database from 'libsql';
 
 export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
   const db = new Database(dbPath);
+  let _manifest;
+  const setManifest = (manifest) => _manifest = manifest;
   const populate = ({ isManifest, collection, single, data, locale }) => {
     if(isManifest === true) return _cacheManifest({ data });
     if(collection !== undefined) return _cacheCollection({ collection, data, locale });
@@ -149,6 +151,9 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     return data;
   }
   const _constructWhere = ({ collection, propName, propComparison }) => {
+    if(_manifest === undefined) {
+      throw new Error('Manifest not defined.');
+    }
     const _whereComponents = {
       _eq: (manifestDataType, compareWith) => {
         let statement = [];
@@ -194,11 +199,11 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     };
     const compareBy = Object.keys(propComparison)[0];
     const compareWith = Object.values(propComparison)[0];
-    const manifestDataType = manifest?.collections?.filter(f => Object.keys(f)[0] === collection)[0][collection]?.filter(f => Object.keys(f)[0] === propName)[0][propName];
+    const manifestDataType = _manifest?.collections?.filter(f => Object.keys(f)[0] === collection)[0][collection][propName];
     let statement = [];
     statement.push(
       ..._whereComponents[compareBy](manifestDataType, compareWith)
-      );
+    );
     return statement.join(' AND ');
   }
 
@@ -206,6 +211,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
   _createCacheTables();
 
   return {
+    setManifest,
     populate,
     get,
     isCached,

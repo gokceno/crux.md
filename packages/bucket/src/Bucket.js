@@ -56,6 +56,7 @@ export const Bucket = () => {
     return this;
   }
   const fetch = async (params) => {
+    _cache.setManifest(params.manifest);
     if(_collection !== undefined) return _fetchCollection({ cache: _cache, source: _source, collection: _collection, order: _order, locale: _locale, filters: _filters, expansions: _expansions, manifest: params.manifest, ...params.limit });
     if(_single !== undefined) return _fetchSingle({ cache: _cache, source: _source, single: _single, expansions: _expansions, ...params });
     throw new Error('Select failed.');
