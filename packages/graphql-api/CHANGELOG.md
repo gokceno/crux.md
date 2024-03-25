@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api
 
+## 1.2.1
+
+### Patch Changes
+
+- Fixed an issue caused by wrongly named fields.
+
 ## 1.2.0
 
 ### Minor Changes

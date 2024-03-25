@@ -76,7 +76,7 @@ const mapGraphQLTypes = (type, name, nodes, depth = 0, prefix) => {
     mappedType = {
       type: new GraphQLObjectType({
         name: [prefix, name].join('_'),
-        fields: mapField({ name: type }, nodes),
+        fields: mapField({ name: type }, nodes, [prefix, name].join('_')),
       })
     }
   }
@@ -99,12 +99,12 @@ const mapGraphQLTypes = (type, name, nodes, depth = 0, prefix) => {
   }
   return mappedType;
 }
-const mapField = (node, nodes) => {
+const mapField = (node, nodes, prefix) => {
   let leafObj = {};
   Object.entries(Object.values(node)[0]).map(([name, type]) => {
     // TODO: Depth is always 0, may be a problem?
     // if(!(typeof type === 'string' && type.includes('/'))) leafObj[name] = mapGraphQLTypes(type, name, nodes, 0, name);
-    leafObj[name] = mapGraphQLTypes(type, name, nodes, 0, name);
+    leafObj[name] = mapGraphQLTypes(type, name, nodes, 0, [prefix, name].join('_'));
   });
   return leafObj;
 }
