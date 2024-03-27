@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.10
+
+### Patch Changes
+
+- Fixed an issue causing filtering \_id and \_slug errors.
+
 ## 0.3.9
 
 ### Patch Changes

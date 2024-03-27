@@ -199,7 +199,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     };
     const compareBy = Object.keys(propComparison)[0];
     const compareWith = Object.values(propComparison)[0];
-    const manifestDataType = _manifest?.collections?.filter(f => Object.keys(f)[0] === collection)[0][collection][propName];
+    const manifestDataType = _manifest?.collections?.filter(f => Object.keys(f)[0] === collection)[0][collection][propName] || 'string';
     let statement = [];
     statement.push(
       ..._whereComponents[compareBy](manifestDataType, compareWith)
