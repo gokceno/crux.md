@@ -8,10 +8,15 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
   const _octokit = new Octokit({ auth });
   const _slugifyReplacements =  [
     ['ü', 'u'],
+    ['Ü', 'u'],
     ['ö', 'o'],
+    ['Ö', 'o'],
     ['ğ', 'g'],
+    ['Ğ', 'g'],
     ['ş', 's'],
+    ['Ş', 's'],
     ['ç', 'c'],
+    ['Ç', 'c'],
   ];
   const open = async({ filename }) => {
     try {
@@ -44,8 +49,8 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
         const fileContents = await open({ filename: path.join((locale ?? ''), 'collections', collection, file.name) });
         const frontMatter = _extractFrontMatter(fileContents);
         return {
-          _id: slugify(file.name.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements }),
-          _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements }),
+          _id: slugify(file.name.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
+          _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
           ...frontMatter,
           ...(omitBody === false ? _extractBody(fileContents) : { _body: null }),
         }
@@ -64,8 +69,8 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     const fileContents = await open({ filename: path.join(...finalPath) });
     const frontMatter = _extractFrontMatter(fileContents);
     return {
-      _id: slugify(filename.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements }),
-      _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements }),
+      _id: slugify(filename.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
+      _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
       ...frontMatter,
       ..._extractBody(fileContents),
     }

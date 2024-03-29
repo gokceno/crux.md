@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.0.8
+
+### Patch Changes
+
+- Fixed an issue during slugifying.
+
 ## 0.0.7
 
 ### Patch Changes
