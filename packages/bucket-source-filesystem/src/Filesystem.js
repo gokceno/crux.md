@@ -17,6 +17,7 @@ export const FileSystem = ({ bucketPath }) => {
     ['Ş', 's'],
     ['ç', 'c'],
     ['Ç', 'c'],
+    ['&', ''],
   ];
   const open = async({ filename }) => {
     try {

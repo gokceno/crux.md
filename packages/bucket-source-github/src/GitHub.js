@@ -17,6 +17,7 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     ['Ş', 's'],
     ['ç', 'c'],
     ['Ç', 'c'],
+    ['&', ''],
   ];
   const open = async({ filename }) => {
     try {

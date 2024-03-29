@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.0.9
+
+### Patch Changes
+
+- Fix slugify replacing ampersands with and's.
+
 ## 0.0.8
 
 ### Patch Changes
