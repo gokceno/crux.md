@@ -6,6 +6,13 @@ import slugify from '@sindresorhus/slugify'
 export const FileSystem = ({ bucketPath }) => {
   const _defaultFileExtension = 'md';
   const _root = [(bucketPath || './')];
+  const _slugifyReplacements =  [
+    ['ü', 'u'],
+    ['ö', 'o'],
+    ['ğ', 'g'],
+    ['ş', 's'],
+    ['ç', 'c'],
+  ];
   const open = async({ filename }) => {
     try {
       return await fs.readFile(path.join(..._root, filename), 'utf8');
@@ -26,8 +33,8 @@ export const FileSystem = ({ bucketPath }) => {
           throw new Error('Failed to get file contents or types got mixed up.');
         }
         return {
-          _id: filename.replace('.' + _defaultFileExtension, ''),
-          _slug: slugify(frontMatter.title || ''),
+          _id: slugify(filename.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements }),
+          _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements }),
           ...frontMatter,
           ...(omitBody === false ? _extractBody(file) : { _body: null }),
         }
@@ -44,7 +51,7 @@ export const FileSystem = ({ bucketPath }) => {
     const frontMatter = _extractFrontMatter(file);
     return {
       _id: slugify(filename.replace('.' + _defaultFileExtension, '')),
-      _slug: slugify(frontMatter.title || ''),
+      _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements }),
       ...frontMatter,
       ..._extractBody(file),
     }

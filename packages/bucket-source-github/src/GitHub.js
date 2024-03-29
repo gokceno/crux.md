@@ -6,6 +6,13 @@ import slugify from '@sindresorhus/slugify'
 export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub-Api-Version': '2022-11-28' } }) => {
   const _defaultFileExtension = 'md';
   const _octokit = new Octokit({ auth });
+  const _slugifyReplacements =  [
+    ['ü', 'u'],
+    ['ö', 'o'],
+    ['ğ', 'g'],
+    ['ş', 's'],
+    ['ç', 'c'],
+  ];
   const open = async({ filename }) => {
     try {
       const response = await _octokit.request(`GET /repos/${owner}/${repo}/contents/${path.join(basePath, filename)}`, {
@@ -37,8 +44,8 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
         const fileContents = await open({ filename: path.join((locale ?? ''), 'collections', collection, file.name) });
         const frontMatter = _extractFrontMatter(fileContents);
         return {
-          _id: file.name.replace('.' + _defaultFileExtension, ''),
-          _slug: slugify(frontMatter.title || ''),
+          _id: slugify(file.name.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements }),
+          _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements }),
           ...frontMatter,
           ...(omitBody === false ? _extractBody(fileContents) : { _body: null }),
         }
@@ -57,8 +64,8 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     const fileContents = await open({ filename: path.join(...finalPath) });
     const frontMatter = _extractFrontMatter(fileContents);
     return {
-      _id: filename.replace('.' + _defaultFileExtension, ''),
-      _slug: slugify(frontMatter.title || ''),
+      _id: slugify(filename.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements }),
+      _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements }),
       ...frontMatter,
       ..._extractBody(fileContents),
     }
