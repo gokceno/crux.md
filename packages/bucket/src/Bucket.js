@@ -58,14 +58,14 @@ export const Bucket = () => {
   const fetch = async (params) => {
     _cache.setManifest(params.manifest);
     if(_collection !== undefined) return _fetchCollection({ cache: _cache, source: _source, collection: _collection, order: _order, locale: _locale, filters: _filters, expansions: _expansions, manifest: params.manifest, ...params.limit });
-    if(_single !== undefined) return _fetchSingle({ cache: _cache, source: _source, single: _single, expansions: _expansions, ...params });
+    if(_single !== undefined) return _fetchSingle({ cache: _cache, source: _source, single: _single, expansions: _expansions, locale: _locale, ...params });
     throw new Error('Select failed.');
   }
   const manifest = async() => {
     // TODO: handle parse errors
-    if(_cache === undefined) return YAML.parse(await _source.open({ filename: 'manifest.yml' }));
+    if(_cache === undefined) return YAML.parse(await _source.open('manifest.yml'));
     if(!_cache.isCached({ isManifest: true })) {
-      return _cache.populate({ isManifest: true, data: YAML.parse(await _source.open({ filename: 'manifest.yml' }))});
+      return _cache.populate({ isManifest: true, data: YAML.parse(await _source.open('manifest.yml'))});
     }
     return _cache.get({ isManifest: true });
   }
@@ -115,7 +115,7 @@ export const Bucket = () => {
   const _fetchSingle = async (params) => {
     const { manifest, cache, source, single, locale, expansions } = params;
     if (!cache.isCached({ single, locale })) {
-      let sourceData = await source.get({ locale, filename: single });
+      let sourceData = await source.get({ locale, single });
       const [ data ] = await Promise.all(expansions.map(async (expansion) => { // FIXME: What if more than one expansion??
         if(typeof Object.values(expansion)[0] === 'string') {
           return await _handleStringExpansion(expansion, sourceData, manifest, cache);

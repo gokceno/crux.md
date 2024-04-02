@@ -19,7 +19,7 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     ['Ç', 'c'],
     ['&', ''],
   ];
-  const open = async({ filename }) => {
+  const open = async(filename) => {
     try {
       const response = await _octokit.request(`GET /repos/${owner}/${repo}/contents/${path.join(basePath, filename)}`, {
         owner,
@@ -47,7 +47,7 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
         headers
       });
       const promises = response?.data?.filter(d => d.name.split('.')[1] === _defaultFileExtension).map(async (file) => {
-        const fileContents = await open({ filename: path.join((locale ?? ''), 'collections', collection, file.name) });
+        const fileContents = await open(path.join((locale ?? ''), 'collections', collection, file.name));
         const frontMatter = _extractFrontMatter(fileContents);
         return {
           _id: slugify(file.name.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
@@ -64,13 +64,13 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
       throw new Error('Generic error.');
     }
   }
-  const get = async({ filename, locale }) => {
-    let finalPath = ['singles', [filename, _defaultFileExtension].join('.')];
+  const get = async({ single, locale }) => {
+    let finalPath = ['singles', [single, _defaultFileExtension].join('.')];
     if(locale !== undefined) finalPath.unshift(locale);
-    const fileContents = await open({ filename: path.join(...finalPath) });
+    const fileContents = await open(path.join(...finalPath));
     const frontMatter = _extractFrontMatter(fileContents);
     return {
-      _id: slugify(filename.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
+      _id: slugify(single, { customReplacements: _slugifyReplacements, decamelize: false }),
       _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
       ...frontMatter,
       ..._extractBody(fileContents),

@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.1.0
+
+### Minor Changes
+
+- Implemented locale based folder/file scanning.
+
 ## 0.0.9
 
 ### Patch Changes

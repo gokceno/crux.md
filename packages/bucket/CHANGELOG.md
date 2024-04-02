@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.2.0
+
+### Minor Changes
+
+- Implemented locale based folder/file scanning.
+
 ## 1.1.6
 
 ### Patch Changes

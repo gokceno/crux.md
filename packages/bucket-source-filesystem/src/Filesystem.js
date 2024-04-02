@@ -5,7 +5,7 @@ import slugify from '@sindresorhus/slugify'
 
 export const FileSystem = ({ bucketPath }) => {
   const _defaultFileExtension = 'md';
-  const _root = [(bucketPath || './')];
+  const _root = bucketPath || './';
   const _slugifyReplacements =  [
     ['ü', 'u'],
     ['Ü', 'u'],
@@ -19,9 +19,9 @@ export const FileSystem = ({ bucketPath }) => {
     ['Ç', 'c'],
     ['&', ''],
   ];
-  const open = async({ filename }) => {
+  const open = async(filename) => {
     try {
-      return await fs.readFile(path.join(..._root, filename), 'utf8');
+      return await fs.readFile(path.join(_root, filename), 'utf8');
     }
     catch(e) {
       console.error(e);
@@ -30,14 +30,18 @@ export const FileSystem = ({ bucketPath }) => {
   }
   const list = async ({ collection, locale, omitBody = true }) => {
     try {
-      const filenames = await fs.readdir(path.join(..._root, (locale ?? ''), 'collections', collection));
+      const filenames = await fs.readdir(
+        _constructPath({ root: _root, collection, locale })
+      );
       const filteredFiles = filenames.filter(filename => filename.split('.')[1] === _defaultFileExtension);
       const filePromises = filteredFiles.map(async (filename) => {
-        const file = await open({ filename: path.join((locale ?? ''), 'collections', collection, filename) });
-        const frontMatter = _extractFrontMatter(file);
+        const file = await open(
+          _constructPath({ locale, collection, filename })
+        );
         if(file === undefined) {
           throw new Error('Failed to get file contents or types got mixed up.');
         }
+        const frontMatter = _extractFrontMatter(file);
         return {
           _id: slugify(filename.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
           _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
@@ -52,15 +56,38 @@ export const FileSystem = ({ bucketPath }) => {
       throw new Error('One or more paths not found.');
     }
   }
-  const get = async({ filename, locale }) => {
-    let file = await open({ filename: path.join((locale ?? ''), 'singles', [filename, _defaultFileExtension].join('.')) });
+  const get = async({ single, locale }) => {
+    let file = await open(
+      _constructPath({ locale, single })
+    );
     const frontMatter = _extractFrontMatter(file);
     return {
-      _id: slugify(filename.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
+      _id: slugify(single, { customReplacements: _slugifyReplacements, decamelize: false }),
       _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
       ...frontMatter,
       ..._extractBody(file),
     }
+  }
+  const _constructPath = ({ root, collection, single, filename, locale }) => {
+    let language, country;
+    let fragments = [];
+    if(root !== undefined) fragments.push(root);
+    if(locale !== undefined) {
+      // eslint-disable-next-line no-unused-vars
+      [language, country] = locale.split('-');
+      fragments.push(language);
+    }
+    if(collection !== undefined) {
+      fragments.push('collections', collection);
+      if (filename !== undefined) fragments.push(filename);
+    }
+    else if(single !== undefined) {
+      fragments.push('singles', [single, _defaultFileExtension].join('.'));
+    }
+    else {
+      throw new Error('Misformed file path.')
+    }
+    return path.join(...fragments);
   }
   const _extractBody = (file) => {
     const body = file.split('---')[2];
