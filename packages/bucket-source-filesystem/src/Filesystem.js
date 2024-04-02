@@ -70,19 +70,21 @@ export const FileSystem = ({ bucketPath }) => {
   }
   const _constructPath = ({ root, collection, single, filename, locale }) => {
     let language, country;
-    let fragments = [];
-    if(root !== undefined) fragments.push(root);
     if(locale !== undefined) {
       // eslint-disable-next-line no-unused-vars
       [language, country] = locale.split('-');
-      fragments.push(language);
     }
+    let fragments = [];
+    if(root !== undefined) fragments.push(root);
     if(collection !== undefined) {
       fragments.push('collections', collection);
-      if (filename !== undefined) fragments.push(filename);
+      if(language) fragments.push(language);
+      if(filename !== undefined) fragments.push(filename);
     }
     else if(single !== undefined) {
-      fragments.push('singles', [single, _defaultFileExtension].join('.'));
+      fragments.push('singles');
+      if(language) fragments.push(language);
+      fragments.push([single, _defaultFileExtension].join('.'));
     }
     else {
       throw new Error('Misformed file path.')

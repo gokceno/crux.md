@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.1.1
+
+### Patch Changes
+
+- Fixed locale paths.
+
 ## 0.1.0
 
 ### Minor Changes

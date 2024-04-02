@@ -28,7 +28,7 @@
     "@gokceno/crux-locales": "0.0.2",
     "@gokceno/crux-bucket": "1.2.0",
     "@gokceno/crux-bucket-cache-libsql": "0.3.10",
-    "@gokceno/crux-bucket-source-filesystem": "0.1.0",
+    "@gokceno/crux-bucket-source-filesystem": "0.1.1",
     "@gokceno/crux-bucket-source-github": "0.1.0"
   }
 }
