@@ -141,6 +141,7 @@ const mapFields = (node, nodes, depth = 0, prefix) => {
 const mapFilterArgs = (collectionName, node) => {
   let leafObj = {};
   Object.entries(Object.values(node)[0]).map(([name, type]) => {
+    if(typeof type === 'string' && type.endsWith('!')) type = type.slice(0, -1);
     if(['string', 'int', 'bool', 'date'].includes(type)) {
       leafObj[name] = { 
         type: new GraphQLInputObjectType({
@@ -191,6 +192,7 @@ const mapLimitArgs = (collectionName) => {
 const mapOrderArgs = (collectionName, node) => {
   let leafObj = {};
   Object.entries(Object.values(node)[0]).map(([name, type]) => {
+    if(typeof type === 'string' && type.endsWith('!')) type = type.slice(0, -1);
     if(['string', 'int', 'date'].includes(type)) {
       leafObj[name] = { 
         type: new GraphQLEnumType({
