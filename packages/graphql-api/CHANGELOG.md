@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api
 
+## 1.2.2
+
+### Patch Changes
+
+- 6143fed: Fixed mandatory fields not showing as filter criteria.
+
 ## 1.2.1
 
 ### Patch Changes
