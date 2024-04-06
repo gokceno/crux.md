@@ -157,12 +157,14 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     const _whereComponents = {
       _eq: (manifestDataType, compareWith) => {
         let statement = [];
+        if(typeof manifestDataType === 'string' && manifestDataType.endsWith('!')) manifestDataType = manifestDataType.slice(0, -1);
         if (['string', 'date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') = '${compareWith.replaceAll("'", "''")}'`);
         if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') = ${compareWith}`);
         if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS ${compareWith}`);
         return statement;
       },
       _neq: (manifestDataType, compareWith) => {
+        if(typeof manifestDataType === 'string' && manifestDataType.endsWith('!')) manifestDataType = manifestDataType.slice(0, -1);
         if (['string', 'date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') != '${compareWith.replaceAll("'", "''")}'`);
         if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') != ${compareWith}`);
         if (['bool', 'boolean'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') IS NOT ${compareWith}`);
@@ -177,21 +179,25 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
         return statement;
       },
       _lt: (manifestDataType, compareWith) => {
+        if(typeof manifestDataType === 'string' && manifestDataType.endsWith('!')) manifestDataType = manifestDataType.slice(0, -1);
         if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') < '${compareWith}'`);
         if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') < ${compareWith}`);
         return statement;
       },
       _gt: (manifestDataType, compareWith) => {
+        if(typeof manifestDataType === 'string' && manifestDataType.endsWith('!')) manifestDataType = manifestDataType.slice(0, -1);
         if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') > '${compareWith}'`);
         if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') > ${compareWith}`);
         return statement;
       },
       _lte: (manifestDataType, compareWith) => {
+        if(typeof manifestDataType === 'string' && manifestDataType.endsWith('!')) manifestDataType = manifestDataType.slice(0, -1);
         if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') <= '${compareWith}'`);
         if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') <= ${compareWith}`);
         return statement;
       },
       _gte: (manifestDataType, compareWith) => {
+        if(typeof manifestDataType === 'string' && manifestDataType.endsWith('!')) manifestDataType = manifestDataType.slice(0, -1);
         if (['date'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') >= '${compareWith}'`);
         if (['int', 'integer', 'number'].includes(manifestDataType)) statement.push(`JSON_EXTRACT(cp.prop_value, '$') >= ${compareWith}`);
         return statement;
