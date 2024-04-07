@@ -91,9 +91,9 @@ export const Bucket = () => {
       cache.populate({ collection, data: expandedList, locale });
       const filteredList = expandedList.filter(item => {
         return filters.every(([field, criteria]) => {
-          const [ condition ] = Object.keys(criteria);
-          const [ value ] = Object.values(criteria);
-          return Comparison[typof(value)]()[condition](item[field], value);
+          return Object.entries(criteria).every(([condition, value]) => {
+            return Comparison[typof(value)]()[condition](item[field], value);
+          });
         });
       });
       if(order.length > 0 || filteredList.length > 0) {
