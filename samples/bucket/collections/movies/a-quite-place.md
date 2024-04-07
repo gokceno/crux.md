@@ -3,7 +3,7 @@ layout: movies
 title: "a A Quite Place: Day One"
 on_homepage: false
 in_theatres: true
-in_theatres_date: '2024-03-08T00:00:00.000Z'
+in_theatres_date: '2024-03-08'
 tag_line: A Film bilgileri hazırlık aşamasındadır.
 poster_url: ''
 video_url: ''
