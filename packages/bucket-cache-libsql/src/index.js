@@ -105,7 +105,6 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
           statement.run([row.lastInsertRowid, propName, JSON.stringify(expandedData)]);
         }
         else if(typeof propValue === 'object' && !Array.isArray(propValue)) {
-          //console.log(propName);
           let returnObject = {};
           await Promise.all(Object.entries(propValue).map(async ([propName, propValue]) => {
             returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
