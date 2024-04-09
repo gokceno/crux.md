@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.12
+
+### Patch Changes
+
+- Fixed an issue that causes duplicate content in collections.
+
 ## 0.3.11
 
 ### Patch Changes

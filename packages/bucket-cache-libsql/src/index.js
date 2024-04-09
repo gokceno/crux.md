@@ -23,9 +23,10 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     return false;
   }
   const _createCacheTables = () => {
+    // TODO: Missinng UNIQUE index.
     db.exec(`CREATE TABLE IF NOT EXISTS singles (id INTEGER PRIMARY KEY, single_type TEXT, locale TEXT, _cached_at TEXT)`);
     db.exec(`CREATE TABLE IF NOT EXISTS singles_props (id INTEGER PRIMARY KEY, single_id INTEGER, prop_name TEXT, prop_value JSON, FOREIGN KEY (single_id) REFERENCES singles(id) ON DELETE CASCADE)`);
-    db.exec(`CREATE TABLE IF NOT EXISTS collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, locale TEXT, _cached_at TEXT)`);
+    db.exec(`CREATE TABLE IF NOT EXISTS collections (id INTEGER PRIMARY KEY, collection_type TEXT, collection_id TEXT, locale TEXT, _cached_at TEXT, UNIQUE(collection_type, collection_id, locale))`);
     db.exec(`CREATE TABLE IF NOT EXISTS collections_props (id INTEGER PRIMARY KEY, collection_id INTEGER, prop_name TEXT, prop_value JSON, FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE)`);
     db.exec(`CREATE TABLE IF NOT EXISTS manifest (id INTEGER PRIMARY KEY, body JSON, _cached_at TEXT)`);
   }
@@ -88,41 +89,51 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     _flush(['collections']);
     data.map(async item => {
       const resolved = await Promise.resolve(item) || {};
-      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection, resolved._id, locale]);
-      const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
-      Object.entries(resolved)
-      // eslint-disable-next-line no-unused-vars
-      .filter(([propName, propValue]) => propValue !== undefined && propValue !== null)
-      .map(async ([propName, propValue]) => {
-        if(typeof propValue === 'function' && propValue.constructor.name === 'AsyncFunction') {
-          const expandedData = await Promise.all((await (await propValue)()).map(async (expand) => {
+      try {
+        const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection, resolved._id, locale]);
+        const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
+        Object.entries(resolved)
+        // eslint-disable-next-line no-unused-vars
+        .filter(([propName, propValue]) => propValue !== undefined && propValue !== null)
+        .map(async ([propName, propValue]) => {
+          if(typeof propValue === 'function' && propValue.constructor.name === 'AsyncFunction') {
+            const expandedData = await Promise.all((await (await propValue)()).map(async (expand) => {
+              let returnObject = {};
+              Object.entries(expand).map(async ([propName, propValue]) =>
+                returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
+                );
+              return returnObject;
+            }));
+            statement.run([row.lastInsertRowid, propName, JSON.stringify(expandedData)]);
+          }
+          else if(typeof propValue === 'object' && !Array.isArray(propValue)) {
             let returnObject = {};
-            Object.entries(expand).map(async ([propName, propValue]) =>
+            await Promise.all(Object.entries(propValue).map(async ([propName, propValue]) => {
               returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
-            );
-            return returnObject;
-          }));
-          statement.run([row.lastInsertRowid, propName, JSON.stringify(expandedData)]);
+              if(typeof returnObject[propName] === 'object') {
+                Object.entries(returnObject[propName]).map(([x, y]) => {
+                  Object.entries(y)
+                  // eslint-disable-next-line no-unused-vars
+                  .filter(([a ,b]) => typeof b === 'function')
+                  .map(async ([a, b]) => returnObject[propName][x][a] = await b());
+                });
+              }
+            }));
+            statement.run([row.lastInsertRowid, propName, JSON.stringify(returnObject)]);
+          }
+          else {
+            statement.run([row.lastInsertRowid, propName, JSON.stringify(propValue)]);
+          }
+        });
+      }
+      catch(e) {
+        switch(e.code) {
+        case 'SQLITE_CONSTRAINT_UNIQUE':
+          break;
+        default:
+          throw new Error(e);
         }
-        else if(typeof propValue === 'object' && !Array.isArray(propValue)) {
-          let returnObject = {};
-          await Promise.all(Object.entries(propValue).map(async ([propName, propValue]) => {
-            returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
-            if(typeof returnObject[propName] === 'object') {
-              Object.entries(returnObject[propName]).map(([x, y]) => {
-                Object.entries(y)
-                // eslint-disable-next-line no-unused-vars
-                .filter(([a ,b]) => typeof b === 'function')
-                .map(async ([a, b]) => returnObject[propName][x][a] = await b());
-              });
-            }
-          }));
-          statement.run([row.lastInsertRowid, propName, JSON.stringify(returnObject)]);
-        }
-        else {
-          statement.run([row.lastInsertRowid, propName, JSON.stringify(propValue)]);
-        }
-      });
+      }
     });
     return data;
   }
