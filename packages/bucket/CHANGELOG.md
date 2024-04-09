@@ -1,5 +1,12 @@
 # @gokceno/crux-bucket
 
+## 1.2.1
+
+### Patch Changes
+
+- Fixed an issue causing expansions in sub-components not caching properly.
+- 92a1dd6: Fixed an issue causing records to be filtered by only the last criteria instead of all critera.
+
 ## 1.2.0
 
 ### Minor Changes

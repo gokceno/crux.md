@@ -84,12 +84,16 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     return JSON.parse(`{${row.properties}}`);
   }
   const _getManifest = () => JSON.parse(db.prepare(`SELECT m.body FROM manifest m WHERE DATETIME(m._cached_at, ?) >= DATETIME()`).get(expires)?.body || '{}');
-  const _cacheCollection = ({ collection, data, locale }) => {
+  const _cacheCollection = async ({ collection, data, locale }) => {
     _flush(['collections']);
     data.map(async item => {
-      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection, item._id, locale]);
+      const resolved = await Promise.resolve(item) || {};
+      const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection, resolved._id, locale]);
       const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
-      Object.entries(item).map(async ([propName, propValue]) => {
+      Object.entries(resolved)
+      // eslint-disable-next-line no-unused-vars
+      .filter(([propName, propValue]) => propValue !== undefined && propValue !== null)
+      .map(async ([propName, propValue]) => {
         if(typeof propValue === 'function' && propValue.constructor.name === 'AsyncFunction') {
           const expandedData = await Promise.all((await (await propValue)()).map(async (expand) => {
             let returnObject = {};
@@ -99,6 +103,22 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
             return returnObject;
           }));
           statement.run([row.lastInsertRowid, propName, JSON.stringify(expandedData)]);
+        }
+        else if(typeof propValue === 'object' && !Array.isArray(propValue)) {
+          //console.log(propName);
+          let returnObject = {};
+          await Promise.all(Object.entries(propValue).map(async ([propName, propValue]) => {
+            returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
+            if(typeof returnObject[propName] === 'object') {
+              Object.entries(returnObject[propName]).map(([x, y]) => {
+                Object.entries(y)
+                // eslint-disable-next-line no-unused-vars
+                .filter(([a ,b]) => typeof b === 'function')
+                .map(async ([a, b]) => returnObject[propName][x][a] = await b());
+              });
+            }
+          }));
+          statement.run([row.lastInsertRowid, propName, JSON.stringify(returnObject)]);
         }
         else {
           statement.run([row.lastInsertRowid, propName, JSON.stringify(propValue)]);

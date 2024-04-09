@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.3.11
+
+### Patch Changes
+
+- Fixed an issue causing expansions in sub-components not caching properly.
+
 ## 0.3.10
 
 ### Patch Changes

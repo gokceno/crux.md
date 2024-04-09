@@ -175,11 +175,11 @@ export const Bucket = () => {
         if(data[componentName] !== undefined) {
           const toReplaceValue = await toReplace[componentItemName];
           const [collection, propName] = componentItemType.split('/');
-          data[componentName][componentItemName] = await (async () => {
+          data[componentName][componentItemName] = async () => {
             const expansions = _findExpansionsByCollection({ expansion, collection, manifest });
             const list = await _fetchCollection({ manifest, expansions, collection, locale: _locale, cache, source: _source });
             return list.filter(item => (toReplaceValue || []).includes(item[propName]));
-          });
+          };
         }
       })
     });
