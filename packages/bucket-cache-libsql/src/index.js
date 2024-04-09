@@ -89,6 +89,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
     _flush(['collections']);
     data.map(async item => {
       const resolved = await Promise.resolve(item) || {};
+      // TODO: insert into ... select ... where not exits ... would be ideal compared to catching errors.
       try {
         const row = db.prepare(`INSERT INTO collections (collection_type, collection_id, locale, _cached_at) VALUES (?, ?, ?, DATETIME())`).run([collection, resolved._id, locale]);
         const statement = db.prepare(`INSERT INTO collections_props (collection_id, prop_name, prop_value) VALUES (?, ?, ?)`);
