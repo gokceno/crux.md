@@ -56,7 +56,6 @@ export const Bucket = () => {
     return this;
   }
   const fetch = async (params) => {
-    _cache.setManifest(params.manifest);
     if(_collection !== undefined) return _fetchCollection({ cache: _cache, source: _source, collection: _collection, order: _order, locale: _locale, filters: _filters, expansions: _expansions, manifest: params.manifest, ...params.limit });
     if(_single !== undefined) return _fetchSingle({ cache: _cache, source: _source, single: _single, expansions: _expansions, locale: _locale, ...params });
     throw new Error('Select failed.');
@@ -71,10 +70,14 @@ export const Bucket = () => {
   }
   const _fetchCollection = async(params = {}) => {
     const { manifest, cache, source, collection, locale, filters = [], order = [], expansions = [], limit, offset } = params;
-    if(!cache.isCached({ collection, locale}) || limit === 1) {
+    let data;
+    if(cache.isCached({ collection, locale}) || limit === 1) {
+      data = cache.get({ collection, locale });
+    }
+    else {
       const list = await source.list({ locale, collection, omitBody: !(limit === 1)  }); // TODO: prone to errors
       if(source.isFiltered === true && source.isOrdered === true && source.isExpanded === true) return list;
-      const expandedList = await list.map(item => {
+      data = await list.map(item => {
         expansions.map(async (expansion) => {
           if(typeof Object.values(expansion)[0] === 'string') {
             await _handleStringExpansion(expansion, item, manifest, cache);
@@ -88,29 +91,28 @@ export const Bucket = () => {
         });
         return item;
       });
-      cache.populate({ collection, data: expandedList, locale });
-      const filteredList = expandedList.filter(item => {
-        return filters.every(([field, criteria]) => {
-          return Object.entries(criteria).every(([condition, value]) => {
-            return Comparison[typof(value)]()[condition](item[field], value);
-          });
+      cache.populate({ collection, data, locale });
+    }
+    const filteredList = data.filter(item => {
+      return filters.every(([field, criteria]) => {
+        return Object.entries(criteria).every(([condition, value]) => {
+          return Comparison[typof(value)]()[condition](item[field], value);
         });
       });
-      if(order.length > 0 || filteredList.length > 0) {
-        order.every(([field, criteria]) => filteredList.sort((a, b) => Sort[criteria](a[field], b[field])));
-      }
-      let slicedList;
-      if(limit !== undefined) {
-        if(filteredList.length >= (offset + limit)) {
-          slicedList = filteredList.slice(offset, offset + limit);
-        }
-        else {
-          throw new Error('Not enough records to offset.');
-        }
-      }
-      return (slicedList || filteredList);
+    });
+    if(order.length > 0 || filteredList.length > 0) {
+      order.every(([field, criteria]) => filteredList.sort((a, b) => Sort[criteria](a[field], b[field])));
     }
-    return cache.get({ collection, locale, filters, order, limit, offset });
+    let slicedList;
+    if(limit !== undefined) {
+      if(filteredList.length >= (offset + limit)) {
+        slicedList = filteredList.slice(offset, offset + limit);
+      }
+      else {
+        throw new Error('Not enough records to offset.');
+      }
+    }
+    return (slicedList || filteredList);
   }
   const _fetchSingle = async (params) => {
     const { manifest, cache, source, single, locale, expansions } = params;

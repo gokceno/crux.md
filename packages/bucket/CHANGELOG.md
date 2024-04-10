@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.3.0
+
+### Minor Changes
+
+- Moved filtering from cache-\* to buckets; CRUX will now use JS filter methods to query results instead of SQLite. Although this reduces performance, the code will be more maintainable. Trade off.
+
 ## 1.2.1
 
 ### Patch Changes

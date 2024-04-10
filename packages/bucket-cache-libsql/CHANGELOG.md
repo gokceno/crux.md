@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.4.0
+
+### Minor Changes
+
+- Moved filtering from cache-\* to buckets; CRUX will now use JS filter methods to query results instead of SQLite. Although this reduces performance, the code will be more maintainable. Trade off.
+
 ## 0.3.12
 
 ### Patch Changes
