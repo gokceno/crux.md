@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.4.1
+
+### Patch Changes
+
+- Fixed an issue from previous release: Replaced a check within SQL with a try-catch (not so elegant). Will change later.
+
 ## 0.4.0
 
 ### Minor Changes
