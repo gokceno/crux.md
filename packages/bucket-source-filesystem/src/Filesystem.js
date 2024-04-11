@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import YAML from 'yaml';
 import slugify from '@sindresorhus/slugify'
+import { constructPath } from '@gokceno/crux-utils';
 
 export const FileSystem = ({ bucketPath }) => {
   const _defaultFileExtension = 'md';
@@ -31,12 +32,12 @@ export const FileSystem = ({ bucketPath }) => {
   const list = async ({ collection, locale, omitBody = true }) => {
     try {
       const filenames = await fs.readdir(
-        _constructPath({ root: _root, collection, locale })
+        constructPath({ root: _root, collection, locale })
       );
       const filteredFiles = filenames.filter(filename => filename.split('.')[1] === _defaultFileExtension);
       const filePromises = filteredFiles.map(async (filename) => {
         const file = await open(
-          _constructPath({ locale, collection, filename })
+          constructPath({ locale, collection, filename })
         );
         if(file === undefined) {
           throw new Error('Failed to get file contents or types got mixed up.');
@@ -58,7 +59,7 @@ export const FileSystem = ({ bucketPath }) => {
   }
   const get = async({ single, locale }) => {
     let file = await open(
-      _constructPath({ locale, single })
+      constructPath({ locale, single })
     );
     const frontMatter = _extractFrontMatter(file);
     return {
@@ -67,29 +68,6 @@ export const FileSystem = ({ bucketPath }) => {
       ...frontMatter,
       ..._extractBody(file),
     }
-  }
-  const _constructPath = ({ root, collection, single, filename, locale }) => {
-    let language, country;
-    if(locale !== undefined) {
-      // eslint-disable-next-line no-unused-vars
-      [language, country] = locale.split('-');
-    }
-    let fragments = [];
-    if(root !== undefined) fragments.push(root);
-    if(collection !== undefined) {
-      fragments.push('collections', collection);
-      if(language) fragments.push(language);
-      if(filename !== undefined) fragments.push(filename);
-    }
-    else if(single !== undefined) {
-      fragments.push('singles');
-      if(language) fragments.push(language);
-      fragments.push([single, _defaultFileExtension].join('.'));
-    }
-    else {
-      throw new Error('Misformed file path.')
-    }
-    return path.join(...fragments);
   }
   const _extractBody = (file) => {
     const body = file.split('---')[2];

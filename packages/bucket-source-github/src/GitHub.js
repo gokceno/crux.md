@@ -2,6 +2,7 @@ import path from 'path';
 import YAML from 'yaml';
 import { Octokit, RequestError } from "octokit";
 import slugify from '@sindresorhus/slugify'
+import { constructPath } from '@gokceno/crux-utils';
 
 export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub-Api-Version': '2022-11-28' } }) => {
   const _defaultFileExtension = 'md';
@@ -19,12 +20,12 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     ['Ç', 'c'],
     ['&', ''],
   ];
-  const open = async(filename) => {
+  const open = async(_path) => {
     try {
-      const response = await _octokit.request(`GET /repos/${owner}/${repo}/contents/${path.join(basePath, filename)}`, {
+      const response = await _octokit.request(`GET /repos/${owner}/${repo}/contents/${path.join(basePath, _path)}`, {
         owner,
         repo,
-        path: path.join(basePath, filename),
+        path: path.join(basePath, _path),
         headers
       });
       return Buffer.from(response?.data?.content, 'base64').toString();
@@ -36,18 +37,15 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     }
   }
   const list = async ({ collection, locale, omitBody = true }) => {
-    let finalPath = [basePath];
-    if(locale !== undefined) finalPath.push(locale);
-    finalPath.push('collections', collection);
     try {
-      const response = await _octokit.request(`GET /repos/${owner}/${repo}/contents/${path.join(...finalPath)}`, {
+      const response = await _octokit.request(`GET /repos/${owner}/${repo}/contents/${constructPath({ root: basePath, collection, locale })}`, {
         owner,
         repo,
-        path: path.join(...finalPath),
+        path: constructPath({ root: basePath, collection, locale }),
         headers
       });
       const promises = response?.data?.filter(d => d.name.split('.')[1] === _defaultFileExtension).map(async (file) => {
-        const fileContents = await open(path.join((locale ?? ''), 'collections', collection, file.name));
+        const fileContents = await open(constructPath({ locale, collection, filename: file.name }));
         const frontMatter = _extractFrontMatter(fileContents);
         return {
           _id: slugify(file.name.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
@@ -65,9 +63,7 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
     }
   }
   const get = async({ single, locale }) => {
-    let finalPath = ['singles', [single, _defaultFileExtension].join('.')];
-    if(locale !== undefined) finalPath.unshift(locale);
-    const fileContents = await open(path.join(...finalPath));
+    const fileContents = await open(constructPath({ single, locale }));
     const frontMatter = _extractFrontMatter(fileContents);
     return {
       _id: slugify(single, { customReplacements: _slugifyReplacements, decamelize: false }),
