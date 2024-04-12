@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.1.2
+
+### Patch Changes
+
+- 92aa309: Moved \_constructPath to @gokceno/crux-utils
+
 ## 0.1.1
 
 ### Patch Changes
