@@ -11,9 +11,7 @@
     "packages/*"
   ],
   "packageManager": "yarn@1.22.19",
-  "scripts": {
-    "release": "release-it"
-  },
+  "scripts": {},
   "version": "1.12.0",
   "dependencies": {
     "@changesets/cli": "^2.27.1"
