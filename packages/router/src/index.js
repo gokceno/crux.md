@@ -7,9 +7,7 @@ import { locales } from '@gokceno/crux-locales';
 
 export const Router = ({ db, schema }) => {
 	const handle = async(req, res) => {
-
-		//const result = await db.select().from(schema.buckets);
-
+		// const result = await db.select().from(schema.buckets);
 		const bucket = Bucket().load({
 			...(req.acceptsLanguages()[0] !== '*') ? { locale: req.acceptsLanguages(locales) } : {},
 			source: GitHub({
@@ -21,7 +19,6 @@ export const Router = ({ db, schema }) => {
 		});
 		bucket.initCache(BucketCache({
 			dbPath: '../../samples/bucket/.cache.sqlite', // Use :memory: only if defined global otherwise it's useless as it recreates cache on every request.
-			expires: '100 SECONDS',
 		}));
 		const manifest = await bucket.manifest();
 		const handler = createHandler({ 
