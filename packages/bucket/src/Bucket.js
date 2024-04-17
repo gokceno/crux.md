@@ -108,8 +108,11 @@ export const Bucket = () => {
       if(filteredList.length >= (offset + limit)) {
         slicedList = filteredList.slice(offset, offset + limit);
       }
+      else if(filteredList.length < (offset + limit) && offset <= filteredList.length) {
+        slicedList = filteredList.slice(offset, filteredList.length);
+      }
       else {
-        throw new Error('Not enough records to offset.');
+        throw new Error(`Not enough records to offset. Hint: There are ${filteredList.length} records.`);
       }
     }
     return (slicedList || filteredList);

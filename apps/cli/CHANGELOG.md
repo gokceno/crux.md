@@ -1,5 +1,12 @@
 # crux-cli
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @gokceno/crux-bucket@1.3.1
+
 ## 0.1.0
 
 ### Minor Changes

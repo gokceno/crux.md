@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.3.1
+
+### Patch Changes
+
+- Fixed "to few records to offset" error during pagination
+
 ## 1.3.0
 
 ### Minor Changes
