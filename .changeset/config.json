@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["crux-api", "crux-cms-auth", "crux-cms"]
+  "ignore": ["crux-api"]
 }
