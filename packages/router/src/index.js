@@ -1,12 +1,15 @@
 import { createHandler } from 'graphql-http/lib/use/express';
-import { schema } from '@gokceno/crux-graphql-schema';
+import { schema as graphQLSchema } from '@gokceno/crux-graphql-schema';
 import { Bucket } from '@gokceno/crux-bucket';
 import { Cache as BucketCache } from '@gokceno/crux-bucket-cache-libsql';
 import { GitHub } from '@gokceno/crux-bucket-source-github';
 import { locales } from '@gokceno/crux-locales';
 
-export const Router = () => {
+export const Router = ({ db, schema }) => {
 	const handle = async(req, res) => {
+
+		//const result = await db.select().from(schema.buckets);
+
 		const bucket = Bucket().load({
 			...(req.acceptsLanguages()[0] !== '*') ? { locale: req.acceptsLanguages(locales) } : {},
 			source: GitHub({
@@ -18,11 +21,11 @@ export const Router = () => {
 		});
 		bucket.initCache(BucketCache({
 			dbPath: '../../samples/bucket/.cache.sqlite', // Use :memory: only if defined global otherwise it's useless as it recreates cache on every request.
-			expires: '10 SECONDS',
+			expires: '100 SECONDS',
 		}));
 		const manifest = await bucket.manifest();
 		const handler = createHandler({ 
-			schema: schema({ bucket, manifest }),
+			schema: graphQLSchema({ bucket, manifest }),
 		});
 		return handler(req, res);
 	}
