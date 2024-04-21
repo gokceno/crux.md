@@ -4,10 +4,11 @@ import bodyParser from 'body-parser';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { Router } from '@gokceno/crux-router';
-import { drizzle } from "drizzle-orm/libsql";
+import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { migrate } from 'drizzle-orm/libsql/migrator';
-import * as schema from "./src/schema.js";
+import * as schema from './src/schema.js';
+import { checkAuthorizationHeaders } from './src/http-utils.js'
 
 dotenv.config();
 
@@ -38,13 +39,6 @@ if(process.env.ENV !== 'production') {
   app.use(pinoHttpLogger);
 }
 
-const checkAuthorizationHeaders = async (req, res, next) => {
-  const [type, token] = (req.headers['authorization'] || '').split(' ');
-  if(type !== 'Bearer' || token === undefined) return res.sendStatus(403);
-  else {
-    next();
-  }
-}
 
 app.use(bodyParser.json());
 app.use(express.json());
