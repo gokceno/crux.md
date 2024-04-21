@@ -12,11 +12,11 @@ import * as schema from "./src/schema.js";
 dotenv.config();
 
 // Set up DB
-const libsqlClient = createClient({ url: process.env.LIBSQL_DB_PATH || 'file:./db/crux.sqlite' });
+const libsqlClient = createClient({ url: process.env.LIBSQL_DB_PATH || 'file:../../db/crux.sqlite' });
 const db = drizzle(libsqlClient);
 
 // Apply migrations
-await migrate(db, { migrationsFolder: process.env.LIBSQL_MIGRATIONS_PATH || './db/migrations' });
+await migrate(db, { migrationsFolder: process.env.LIBSQL_MIGRATIONS_PATH || '../../db/migrations' });
 
 // Set up logging
 const loggerOptions = {
@@ -50,6 +50,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 app.get('/', (req, res) => res.redirect('https://github.com/gokceno/crux.md'));
+
 app.all('/graphql', checkAuthorizationHeaders, async (req, res) => Router({ db, schema }).handle(req, res));
 
 (async () => {
