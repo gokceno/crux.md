@@ -19,7 +19,6 @@
   "dependencies": {
     "@gokceno/crux-router": "0.0.3",
     "@libsql/client": "^0.6.0",
-    "@paralleldrive/cuid2": "^2.2.2",
     "body-parser": "1.20.2",
     "dotenv": "^16.0.3",
     "express": "4.19.2",

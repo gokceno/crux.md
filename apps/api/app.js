@@ -7,7 +7,6 @@ import { Router } from '@gokceno/crux-router';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { migrate } from 'drizzle-orm/libsql/migrator';
-import * as schema from './src/schema.js';
 import { checkAuthorizationHeaders } from './src/http-utils.js'
 
 dotenv.config();
@@ -39,13 +38,12 @@ if(process.env.ENV !== 'production') {
   app.use(pinoHttpLogger);
 }
 
-
 app.use(bodyParser.json());
 app.use(express.json());
 
 app.get('/', (req, res) => res.redirect('https://github.com/gokceno/crux.md'));
 
-app.all('/graphql', checkAuthorizationHeaders, async (req, res) => Router({ db, schema }).handle(req, res));
+app.all('/graphql', checkAuthorizationHeaders, async (req, res) => Router({ db }).handle(req, res));
 
 (async () => {
   const port = process.env.PORT || 8001;

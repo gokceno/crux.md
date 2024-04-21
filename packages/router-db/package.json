@@ -1,0 +1,17 @@
+{
+  "name": "@gokceno/crux-router-db",
+  "repository": "git+https://github.com/gokceno/crux.md.git",
+  "version": "0.0.1",
+  "main": "./src/index.js",
+  "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.20.14",
+    "drizzle-orm": "^0.30.8"
+  }
+}

@@ -13,6 +13,7 @@
     "@gokceno/crux-bucket-source-github": "0.1.1",
     "@gokceno/crux-graphql-schema": "1.0.7",
     "@gokceno/crux-locales": "0.0.2",
+    "@gokceno/crux-router-db": "0.0.1",
     "graphql": "^16.8.1",
     "graphql-http": "^1.19.0"
   },
