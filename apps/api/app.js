@@ -28,6 +28,7 @@ const loggerOptions = {
     }
   },
 };
+
 const logger = pino(loggerOptions);
 
 const app = express();
@@ -37,11 +38,19 @@ if(process.env.ENV !== 'production') {
   app.use(pinoHttpLogger);
 }
 
+const checkAuthorizationHeaders = async (req, res, next) => {
+  const [type, token] = (req.headers['authorization'] || '').split(' ');
+  if(type !== 'Bearer' || token === undefined) return res.sendStatus(403);
+  else {
+    next();
+  }
+}
+
 app.use(bodyParser.json());
 app.use(express.json());
 
 app.get('/', (req, res) => res.redirect('https://github.com/gokceno/crux.md'));
-app.all('/graphql', async (req, res) => Router({ db, schema }).handle(req, res));
+app.all('/graphql', checkAuthorizationHeaders, async (req, res) => Router({ db, schema }).handle(req, res));
 
 (async () => {
   const port = process.env.PORT || 8001;
