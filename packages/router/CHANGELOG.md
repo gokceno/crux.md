@@ -1,5 +1,11 @@
 # @gokceno/crux-router
 
+## 0.1.0
+
+### Minor Changes
+
+- Moved static source repo info to DB, to be used with an access key
+
 ## 0.0.3
 
 ### Patch Changes

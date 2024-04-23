@@ -17,7 +17,7 @@
     "db:migrate": "npx drizzle-kit generate:sqlite"
   },
   "dependencies": {
-    "@gokceno/crux-router": "0.0.3",
+    "@gokceno/crux-router": "0.1.0",
     "@libsql/client": "^0.6.0",
     "body-parser": "1.20.2",
     "dotenv": "^16.0.3",
