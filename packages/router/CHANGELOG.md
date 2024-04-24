@@ -1,5 +1,12 @@
 # @gokceno/crux-router
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @gokceno/crux-bucket-cache-libsql@0.4.2
+
 ## 0.1.0
 
 ### Minor Changes

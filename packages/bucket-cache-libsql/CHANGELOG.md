@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-cache-libsql
 
+## 0.4.2
+
+### Patch Changes
+
+- Fixed an issue causing empty values an error.
+
 ## 0.4.1
 
 ### Patch Changes

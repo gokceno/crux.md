@@ -98,7 +98,7 @@ export const Cache = ({ dbPath = ':memory:', expires = '600 SECONDS' }) => {
             let returnObject = {};
             await Promise.all(Object.entries(propValue).map(async ([propName, propValue]) => {
               returnObject[propName] = typeof propValue === 'function' ? (await Promise.resolve(propValue())) : propValue
-              if(typeof returnObject[propName] === 'object') {
+              if(returnObject[propName] != undefined && typeof returnObject[propName] === 'object') {
                 Object.entries(returnObject[propName]).map(([x, y]) => {
                   Object.entries(y)
                   // eslint-disable-next-line no-unused-vars
