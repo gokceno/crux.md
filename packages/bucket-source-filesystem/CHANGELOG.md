@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.2.0
+
+### Minor Changes
+
+- Allowed accented Turkish characters in slugs.
+
 ## 0.1.2
 
 ### Patch Changes

@@ -8,16 +8,6 @@ export const FileSystem = ({ bucketPath }) => {
   const _defaultFileExtension = 'md';
   const _root = bucketPath || './';
   const _slugifyReplacements =  [
-    ['ü', 'u'],
-    ['Ü', 'u'],
-    ['ö', 'o'],
-    ['Ö', 'o'],
-    ['ğ', 'g'],
-    ['Ğ', 'g'],
-    ['ş', 's'],
-    ['Ş', 's'],
-    ['ç', 'c'],
-    ['Ç', 'c'],
     ['&', ''],
   ];
   const open = async(filename) => {

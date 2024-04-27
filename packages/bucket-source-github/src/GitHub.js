@@ -8,16 +8,6 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
   const _defaultFileExtension = 'md';
   const _octokit = new Octokit({ auth });
   const _slugifyReplacements =  [
-    ['ü', 'u'],
-    ['Ü', 'u'],
-    ['ö', 'o'],
-    ['Ö', 'o'],
-    ['ğ', 'g'],
-    ['Ğ', 'g'],
-    ['ş', 's'],
-    ['Ş', 's'],
-    ['ç', 'c'],
-    ['Ç', 'c'],
     ['&', ''],
   ];
   const open = async(_path) => {
