@@ -4,11 +4,11 @@ dotenv.config();
 
 export default {
   driver: 'libsql',
-  schema: './src/schema.js',
-  out: process.env.LIBSQL_MIGRATIONS_PATH || './db/migrations',
+  schema: '../../packages/router-db/src/index.js', // TODO: Dependency to child?
+  out: process.env.LIBSQL_MIGRATIONS_PATH,
   dbCredentials: {
-    url: process.env.LIBSQL_DB_PATH || 'file:./db/crux.sqlite',
+    url: process.env.LIBSQL_URL,
+    authToken: process.env.LIBSQL_AUTH_TOKEN,
   },
   verbose: true,
-  strict: true,
 }

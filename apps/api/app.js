@@ -12,7 +12,12 @@ import { checkAuthorizationHeaders } from './src/http-utils.js'
 dotenv.config();
 
 // Set up DB
-const libsqlClient = createClient({ url: process.env.LIBSQL_DB_PATH || 'file:../../db/crux.sqlite' });
+const libsqlClient = createClient({ 
+  url: process.env.LIBSQL_URL || 'file:../../db/crux.sqlite',
+  syncUrl: process.env.LIBSQL_SYNC_URL,
+  authToken: process.env.LIBSQL_AUTH_TOKEN,
+  syncInterval: process.env.LIBSQL_SYNC_INTERVAL,
+});
 const db = drizzle(libsqlClient);
 
 // Apply migrations
