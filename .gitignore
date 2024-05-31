@@ -3,6 +3,7 @@
 # SQLite
 
 **/*.sqlite
+**/*.sqlite*
 
 # Logs
 logs
