@@ -14,7 +14,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node app.js",
-    "db:migrate": "npx drizzle-kit generate:sqlite"
+    "db:generate": "npx drizzle-kit generate:sqlite"
   },
   "dependencies": {
     "@gokceno/crux-router": "0.1.2",
