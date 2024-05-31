@@ -4,7 +4,7 @@ import { createId } from '@paralleldrive/cuid2';
 import { randomBytes } from 'node:crypto';
 
 export const buckets = sqliteTable('buckets', {
-  id: text('id').notNull().$defaultFn(() => createId()),
+  id: text('id').primaryKey().notNull().$defaultFn(() => createId()),
   source: text('source').notNull(),
   cache: text('cache').notNull(),
   accessKey: text('access_key').notNull().$defaultFn(() => randomBytes(64).toString('base64url')),
