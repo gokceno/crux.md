@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "f1aea247-e1ef-4003-a3f7-44c9b4b27e29",
+  "id": "df9b06f8-2d45-4021-9a12-d07f1ed5e4ae",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "buckets": {
@@ -10,7 +10,7 @@
         "id": {
           "name": "id",
           "type": "text",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
