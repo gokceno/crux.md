@@ -71,7 +71,7 @@ export const Bucket = () => {
   const _fetchCollection = async(params = {}) => {
     const { manifest, cache, source, collection, locale, filters = [], order = [], expansions = [], limit, offset } = params;
     let data;
-    if(cache.isCached({ collection, locale}) || limit === 1) {
+    if(cache.isCached({ collection, locale})) {
       data = cache.get({ collection, locale });
     }
     else {

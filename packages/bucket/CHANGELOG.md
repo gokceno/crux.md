@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket
 
+## 1.3.2
+
+### Patch Changes
+
+- Fixed an issue causing records to fetched only from cache when limit=1
+
 ## 1.3.1
 
 ### Patch Changes

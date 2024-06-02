@@ -1,5 +1,12 @@
 # @gokceno/crux-router
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @gokceno/crux-bucket@1.3.2
+
 ## 0.1.2
 
 ### Patch Changes
