@@ -36,6 +36,7 @@ export const FileSystem = ({ bucketPath }) => {
         return {
           _id: slugify(filename.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
           _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
+          _filename: file.name.replace('.' + _defaultFileExtension, ''),
           ...frontMatter,
           ...(omitBody === false ? _extractBody(file) : { _body: null }),
         }
@@ -55,6 +56,7 @@ export const FileSystem = ({ bucketPath }) => {
     return {
       _id: slugify(single, { customReplacements: _slugifyReplacements, decamelize: false }),
       _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
+      _filename: single,
       ...frontMatter,
       ..._extractBody(file),
     }

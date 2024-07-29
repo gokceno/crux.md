@@ -40,6 +40,7 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
         return {
           _id: slugify(file.name.replace('.' + _defaultFileExtension, ''), { customReplacements: _slugifyReplacements, decamelize: false }),
           _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
+          _filename: file.name.replace('.' + _defaultFileExtension, ''),
           ...frontMatter,
           ...(omitBody === false ? _extractBody(fileContents) : { _body: null }),
         }
@@ -55,9 +56,13 @@ export const GitHub = ({ owner, repo, basePath = '', auth, headers = { 'X-GitHub
   const get = async({ single, locale }) => {
     const fileContents = await open(constructPath({ single, locale }));
     const frontMatter = _extractFrontMatter(fileContents);
+
+    console.log(single);
+
     return {
       _id: slugify(single, { customReplacements: _slugifyReplacements, decamelize: false }),
       _slug: slugify(frontMatter.title || '', { customReplacements: _slugifyReplacements, decamelize: false }),
+      _filename: single,
       ...frontMatter,
       ..._extractBody(fileContents),
     }

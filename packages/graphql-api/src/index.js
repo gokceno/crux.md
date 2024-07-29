@@ -114,6 +114,7 @@ const mapFields = (node, nodes, depth = 0, prefix) => {
     Object.values(node)[0]['_body'] = 'string';
     Object.values(node)[0]['_id'] = 'string';
     Object.values(node)[0]['_slug'] = 'string';
+    Object.values(node)[0]['_filename'] = 'string';
   }
   Object.entries(Object.values(node)[0])
   .map(([name, type]) => {
@@ -153,7 +154,7 @@ const mapFilterArgs = (collectionName, node) => {
     return leafObj;
   });
   if(Object.keys(leafObj).length === 0) return undefined;
-  ['_id', '_slug'].map(field => {
+  ['_id', '_slug', '_filename'].map(field => {
     leafObj[field] = { 
       type: new GraphQLInputObjectType({
         name: `filter_${collectionName}_${field}`, 
@@ -206,7 +207,7 @@ const mapOrderArgs = (collectionName, node) => {
     }
   })
   if(Object.keys(leafObj).length === 0) return undefined;
-  ['_id', '_slug'].map(field => {
+  ['_id', '_slug', '_filename'].map(field => {
     leafObj[field] = { 
       type: new GraphQLEnumType({
         name: `order_${collectionName}_${field}`,
