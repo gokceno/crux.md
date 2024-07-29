@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.3.1
+
+### Patch Changes
+
+- Fixed an issue causing wrongful ids in filesystem source
+
 ## 0.3.0
 
 ### Minor Changes
