@@ -1,5 +1,11 @@
 # @gokceno/crux-graphql-api
 
+## 1.3.0
+
+### Minor Changes
+
+- Added \_filename to response payloads
+
 ## 1.2.2
 
 ### Patch Changes

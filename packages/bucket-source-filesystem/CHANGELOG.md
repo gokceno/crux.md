@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.3.0
+
+### Minor Changes
+
+- Added \_filename to response payloads
+
 ## 0.2.0
 
 ### Minor Changes
