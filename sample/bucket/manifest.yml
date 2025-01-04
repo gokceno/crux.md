@@ -1,0 +1,17 @@
+collections:
+ - blogs:
+     title: "string"
+     published_at: "date"
+     cover_image: "string!"
+     tags: []
+     authors:
+       - full_name: "string!"
+         title: "string!"
+         avatar: "string!"
+         social_media: 
+           - url: "string!"
+             site: "string!" 
+     related_blogs: "blogs/title"
+singles:
+  - home:
+      title: "string"

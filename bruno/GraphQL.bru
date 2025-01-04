@@ -5,11 +5,26 @@ meta {
 }
 
 post {
-  url: https://crux.md/api/graphql
-  body: none
+  url: http://127.0.0.1:8001/graphql
+  body: graphql
   auth: bearer
+}
+
+headers {
+  accept-language: tr-TR
 }
 
 auth:bearer {
   token: 1111
+}
+
+body:graphql {
+  query x {
+    social_media {
+     accounts {
+      icon
+    }
+    }
+  }
+  
 }
