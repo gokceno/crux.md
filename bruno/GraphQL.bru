@@ -11,19 +11,20 @@ post {
 }
 
 headers {
-  accept-language: tr-TR
+  ~accept-language: en-US
 }
 
 auth:bearer {
-  token: 1111
+  token: TWWIluT2ExNH9HOCEH9LrPlf37KK2fAc
 }
 
 body:graphql {
   query x {
-    social_media {
-     accounts {
-      icon
-    }
+    blogs {
+      title
+      authors {
+        full_name
+      }
     }
   }
   
