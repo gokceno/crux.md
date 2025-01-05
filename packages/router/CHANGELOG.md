@@ -1,5 +1,11 @@
 # @gokceno/crux-router
 
+## 0.2.0
+
+### Minor Changes
+
+- f116720: Added filesystem provider for buckets.
+
 ## 0.1.4
 
 ### Patch Changes
