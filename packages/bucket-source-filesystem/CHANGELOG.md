@@ -1,5 +1,11 @@
 # @gokceno/crux-bucket-source-filesystem
 
+## 0.3.2
+
+### Patch Changes
+
+- Fix an issue causing an error when the contents are formatted incorrectly.
+
 ## 0.3.1
 
 ### Patch Changes

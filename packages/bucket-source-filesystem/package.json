@@ -1,7 +1,7 @@
 {
   "name": "@gokceno/crux-bucket-source-filesystem",
   "repository": "git+https://github.com/gokceno/crux.md.git",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "main": "./src/Filesystem.js",
   "type": "module",
   "publishConfig": {
